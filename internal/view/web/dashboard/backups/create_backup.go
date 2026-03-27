@@ -5,10 +5,12 @@ import (
 	"time"
 
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/staticdata"
 	"github.com/eduardolat/pgbackweb/internal/util/echoutil"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/google/uuid"
@@ -76,6 +78,7 @@ func (h *handlers) createBackupHandler(c echo.Context) error {
 
 func (h *handlers) createBackupFormHandler(c echo.Context) error {
 	ctx := c.Request().Context()
+	reqCtx := reqctx.GetCtx(c)
 
 	databases, err := h.servs.DatabasesService.GetAllDatabases(ctx)
 	if err != nil {
@@ -88,18 +91,26 @@ func (h *handlers) createBackupFormHandler(c echo.Context) error {
 	}
 
 	return echoutil.RenderNodx(
-		c, http.StatusOK, createBackupForm(databases, destinations),
+		c, http.StatusOK, createBackupForm(reqCtx, databases, destinations),
 	)
 }
 
 func createBackupForm(
+	reqCtx reqctx.Ctx,
 	databases []dbgen.DatabasesServiceGetAllDatabasesRow,
 	destinations []dbgen.DestinationsServiceGetAllDestinationsRow,
 ) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	yesNoOptions := func() nodx.Node {
 		return nodx.Group(
-			nodx.Option(nodx.Value("true"), nodx.Text("Yes")),
-			nodx.Option(nodx.Value("false"), nodx.Text("No"), nodx.Selected("")),
+			nodx.Option(nodx.Value("true"), nodx.Text(t("Yes"))),
+			nodx.Option(nodx.Value("false"), nodx.Text(t("No")), nodx.Selected("")),
 		)
 	}
 
@@ -143,10 +154,10 @@ func createBackupForm(
 			Required: true,
 			Children: []nodx.Node{
 				alpine.XModel("is_local"),
-				nodx.Option(nodx.Value("true"), nodx.Text("Yes")),
-				nodx.Option(nodx.Value("false"), nodx.Text("No"), nodx.Selected("")),
+				nodx.Option(nodx.Value("true"), nodx.Text(t("Yes"))),
+				nodx.Option(nodx.Value("false"), nodx.Text(t("No")), nodx.Selected("")),
 			},
-			HelpButtonChildren: localBackupsHelp(),
+			HelpButtonChildren: localBackupsHelp(reqCtx),
 		}),
 
 		alpine.Template(
@@ -175,7 +186,7 @@ func createBackupForm(
 			Type:               component.InputTypeText,
 			HelpText:           "The cron expression to schedule the backup",
 			Pattern:            `^\S+\s+\S+\s+\S+\s+\S+\s+\S+$`,
-			HelpButtonChildren: cronExpressionHelp(),
+			HelpButtonChildren: cronExpressionHelp(reqCtx),
 		}),
 
 		component.SelectControl(component.SelectControlParams{
@@ -196,7 +207,7 @@ func createBackupForm(
 					},
 				),
 			},
-			HelpButtonChildren: timezoneFilenamesHelp(),
+			HelpButtonChildren: timezoneFilenamesHelp(reqCtx),
 		}),
 
 		component.InputControl(component.InputControlParams{
@@ -207,7 +218,7 @@ func createBackupForm(
 			Type:               component.InputTypeText,
 			HelpText:           "Relative to the base directory of the destination",
 			Pattern:            `^\/\S*[^\/]$`,
-			HelpButtonChildren: destinationDirectoryHelp(),
+			HelpButtonChildren: destinationDirectoryHelp(reqCtx),
 		}),
 
 		component.InputControl(component.InputControlParams{
@@ -229,8 +240,8 @@ func createBackupForm(
 			Label:    "Activate backup",
 			Required: true,
 			Children: []nodx.Node{
-				nodx.Option(nodx.Value("true"), nodx.Text("Yes")),
-				nodx.Option(nodx.Value("false"), nodx.Text("No")),
+				nodx.Option(nodx.Value("true"), nodx.Text(t("Yes"))),
+				nodx.Option(nodx.Value("false"), nodx.Text(t("No"))),
 			},
 		}),
 
@@ -238,10 +249,10 @@ func createBackupForm(
 			nodx.Class("pt-4"),
 			nodx.Div(
 				nodx.Class("flex justify-start items-center space-x-1"),
-				component.H2Text("Options"),
+				component.H2Text(t("Options")),
 				component.HelpButtonModal(component.HelpButtonModalParams{
 					ModalTitle: "Backup options",
-					Children:   pgDumpOptionsHelp(),
+					Children:   pgDumpOptionsHelp(reqCtx),
 				}),
 			),
 
@@ -310,17 +321,24 @@ func createBackupForm(
 			nodx.Button(
 				nodx.Class("btn btn-primary"),
 				nodx.Type("submit"),
-				component.SpanText("Create backup task"),
+				component.SpanText(t("Create backup task")),
 				lucide.Save(),
 			),
 		),
 	)
 }
 
-func createBackupButton() nodx.Node {
+func createBackupButton(reqCtx reqctx.Ctx) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	mo := component.Modal(component.ModalParams{
 		Size:  component.SizeLg,
-		Title: "Create backup task",
+		Title: t("Create backup task"),
 		Content: []nodx.Node{
 			nodx.Div(
 				htmx.HxGet(pathutil.BuildPath("/dashboard/backups/create-form")),
@@ -335,7 +353,7 @@ func createBackupButton() nodx.Node {
 	button := nodx.Button(
 		mo.OpenerAttr,
 		nodx.Class("btn btn-primary"),
-		component.SpanText("Create backup task"),
+		component.SpanText(t("Create backup task")),
 		lucide.Plus(),
 	)
 

@@ -5,9 +5,11 @@ import (
 	"fmt"
 
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/staticdata"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/google/uuid"
@@ -70,17 +72,24 @@ func (h *handlers) editBackupHandler(c echo.Context) error {
 	return respondhtmx.AlertWithRefresh(c, "Backup task updated")
 }
 
-func editBackupButton(backup dbgen.BackupsServicePaginateBackupsRow) nodx.Node {
+func editBackupButton(reqCtx reqctx.Ctx, backup dbgen.BackupsServicePaginateBackupsRow) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	yesNoOptions := func(value bool) nodx.Node {
 		return nodx.Group(
 			nodx.Option(
 				nodx.Value("true"),
-				nodx.Text("Yes"),
+				nodx.Text(t("Yes")),
 				nodx.If(value, nodx.Selected("")),
 			),
 			nodx.Option(
 				nodx.Value("false"),
-				nodx.Text("No"),
+				nodx.Text(t("No")),
 				nodx.If(!value, nodx.Selected("")),
 			),
 		)
@@ -88,7 +97,7 @@ func editBackupButton(backup dbgen.BackupsServicePaginateBackupsRow) nodx.Node {
 
 	mo := component.Modal(component.ModalParams{
 		Size:  component.SizeLg,
-		Title: "Edit backup task",
+		Title: t("Edit backup task"),
 		Content: []nodx.Node{
 			nodx.FormEl(
 				htmx.HxPost(pathutil.BuildPath(fmt.Sprintf("/dashboard/backups/%s/edit", backup.ID))),
@@ -117,7 +126,7 @@ func editBackupButton(backup dbgen.BackupsServicePaginateBackupsRow) nodx.Node {
 					Children: []nodx.Node{
 						nodx.Value(backup.CronExpression),
 					},
-					HelpButtonChildren: cronExpressionHelp(),
+					HelpButtonChildren: cronExpressionHelp(reqCtx),
 				}),
 
 				component.SelectControl(component.SelectControlParams{
@@ -140,7 +149,7 @@ func editBackupButton(backup dbgen.BackupsServicePaginateBackupsRow) nodx.Node {
 							},
 						),
 					},
-					HelpButtonChildren: timezoneFilenamesHelp(),
+					HelpButtonChildren: timezoneFilenamesHelp(reqCtx),
 				}),
 
 				component.InputControl(component.InputControlParams{
@@ -150,7 +159,7 @@ func editBackupButton(backup dbgen.BackupsServicePaginateBackupsRow) nodx.Node {
 					Required:           true,
 					Type:               component.InputTypeText,
 					HelpText:           "Relative to the base directory of the destination",
-					HelpButtonChildren: destinationDirectoryHelp(),
+					HelpButtonChildren: destinationDirectoryHelp(reqCtx),
 					Pattern:            `^\/\S*[^\/]$`,
 					Children: []nodx.Node{
 						nodx.Value(backup.DestDir),
@@ -185,10 +194,10 @@ func editBackupButton(backup dbgen.BackupsServicePaginateBackupsRow) nodx.Node {
 					nodx.Class("pt-4"),
 					nodx.Div(
 						nodx.Class("flex justify-start items-center space-x-1"),
-						component.H2Text("Options"),
+						component.H2Text(t("Options")),
 						component.HelpButtonModal(component.HelpButtonModalParams{
 							ModalTitle: "Backup options",
-							Children:   pgDumpOptionsHelp(),
+							Children:   pgDumpOptionsHelp(reqCtx),
 						}),
 					),
 
@@ -256,7 +265,7 @@ func editBackupButton(backup dbgen.BackupsServicePaginateBackupsRow) nodx.Node {
 					nodx.Button(
 						nodx.Class("btn btn-primary"),
 						nodx.Type("submit"),
-						component.SpanText("Save"),
+						component.SpanText(t("Save")),
 						lucide.Save(),
 					),
 				),
@@ -269,7 +278,7 @@ func editBackupButton(backup dbgen.BackupsServicePaginateBackupsRow) nodx.Node {
 		component.OptionsDropdownButton(
 			mo.OpenerAttr,
 			lucide.Pencil(),
-			component.SpanText("Edit backup task"),
+			component.SpanText(t("Edit backup task")),
 		),
 	)
 }

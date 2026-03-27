@@ -5,9 +5,11 @@ import (
 	"net/http"
 
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/echoutil"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/google/uuid"
@@ -60,6 +62,7 @@ func (h *handlers) createWebhookHandler(c echo.Context) error {
 
 func (h *handlers) createWebhookFormHandler(c echo.Context) error {
 	ctx := c.Request().Context()
+	reqCtx := reqctx.GetCtx(c)
 
 	databases, err := h.servs.DatabasesService.GetAllDatabases(ctx)
 	if err != nil {
@@ -77,21 +80,29 @@ func (h *handlers) createWebhookFormHandler(c echo.Context) error {
 	}
 
 	return echoutil.RenderNodx(c, http.StatusOK, createWebhookForm(
-		databases, destinations, backups,
+		reqCtx, databases, destinations, backups,
 	))
 }
 
 func createWebhookForm(
+	reqCtx reqctx.Ctx,
 	databases []dbgen.DatabasesServiceGetAllDatabasesRow,
 	destinations []dbgen.DestinationsServiceGetAllDestinationsRow,
 	backups []dbgen.Backup,
 ) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	return nodx.FormEl(
 		htmx.HxPost(pathutil.BuildPath("/dashboard/webhooks/create")),
 		htmx.HxDisabledELT("find button[type='submit']"),
 		nodx.Class("space-y-2"),
 
-		createAndUpdateWebhookForm(databases, destinations, backups),
+		createAndUpdateWebhookForm(reqCtx, databases, destinations, backups),
 
 		nodx.Div(
 			nodx.Class("flex justify-end items-center space-x-2 pt-2"),
@@ -99,17 +110,24 @@ func createWebhookForm(
 			nodx.Button(
 				nodx.Class("btn btn-primary"),
 				nodx.Type("submit"),
-				component.SpanText("Save"),
+				component.SpanText(t("Save")),
 				lucide.Save(),
 			),
 		),
 	)
 }
 
-func createWebhookButton() nodx.Node {
+func createWebhookButton(reqCtx reqctx.Ctx) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	mo := component.Modal(component.ModalParams{
 		Size:  component.SizeLg,
-		Title: "Create webhook",
+		Title: t("Create webhook"),
 		Content: []nodx.Node{
 			nodx.Div(
 				htmx.HxGet(pathutil.BuildPath("/dashboard/webhooks/create")),
@@ -124,7 +142,7 @@ func createWebhookButton() nodx.Node {
 	button := nodx.Button(
 		mo.OpenerAttr,
 		nodx.Class("btn btn-primary"),
-		component.SpanText("Create webhook"),
+		component.SpanText(t("Create webhook")),
 		lucide.Plus(),
 	)
 

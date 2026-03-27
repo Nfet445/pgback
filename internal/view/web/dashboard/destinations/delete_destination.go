@@ -3,7 +3,9 @@ package destinations
 import (
 	"fmt"
 
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/google/uuid"
@@ -29,11 +31,18 @@ func (h *handlers) deleteDestinationHandler(c echo.Context) error {
 	return respondhtmx.Refresh(c)
 }
 
-func deleteDestinationButton(destinationID uuid.UUID) nodx.Node {
+func deleteDestinationButton(reqCtx reqctx.Ctx, destinationID uuid.UUID) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	return component.OptionsDropdownButton(
 		htmx.HxDelete(pathutil.BuildPath(fmt.Sprintf("/dashboard/destinations/%s", destinationID))),
-		htmx.HxConfirm("Are you sure you want to delete this destination?"),
+		htmx.HxConfirm(t("Are you sure?")),
 		lucide.Trash(),
-		component.SpanText("Delete destination"),
+		component.SpanText(t("Delete destination")),
 	)
 }

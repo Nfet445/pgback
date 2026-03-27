@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/logger"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/google/uuid"
@@ -43,11 +45,18 @@ func (h *handlers) runWebhookHandler(c echo.Context) error {
 	return respondhtmx.ToastSuccess(c, "Running webhook, check the webhook executions for more details")
 }
 
-func runWebhookButton(webhookID uuid.UUID) nodx.Node {
+func runWebhookButton(reqCtx reqctx.Ctx, webhookID uuid.UUID) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	return component.OptionsDropdownButton(
 		htmx.HxPost(pathutil.BuildPath(fmt.Sprintf("/dashboard/webhooks/%s/run", webhookID))),
 		htmx.HxDisabledELT("this"),
 		lucide.Zap(),
-		component.SpanText("Run webhook now"),
+		component.SpanText(t("Run webhook now")),
 	)
 }

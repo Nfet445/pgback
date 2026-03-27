@@ -3,7 +3,9 @@ package backups
 import (
 	"fmt"
 
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/google/uuid"
@@ -28,11 +30,18 @@ func (h *handlers) deleteBackupHandler(c echo.Context) error {
 	return respondhtmx.Refresh(c)
 }
 
-func deleteBackupButton(backupID uuid.UUID) nodx.Node {
+func deleteBackupButton(reqCtx reqctx.Ctx, backupID uuid.UUID) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	return component.OptionsDropdownButton(
 		htmx.HxDelete(pathutil.BuildPath(fmt.Sprintf("/dashboard/backups/%s", backupID))),
 		htmx.HxConfirm("Are you sure you want to delete this backup task?"),
 		lucide.Trash(),
-		component.SpanText("Delete backup task"),
+		component.SpanText(t("Delete backup task")),
 	)
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/eduardolat/pgbackweb/internal/util/strutil"
 	"github.com/eduardolat/pgbackweb/internal/util/timeutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/google/uuid"
@@ -28,6 +29,7 @@ type listResQueryData struct {
 
 func (h *handlers) listRestorationsHandler(c echo.Context) error {
 	ctx := c.Request().Context()
+	reqCtx := reqctx.GetCtx(c)
 
 	var queryData listResQueryData
 	if err := c.Bind(&queryData); err != nil {
@@ -54,11 +56,12 @@ func (h *handlers) listRestorationsHandler(c echo.Context) error {
 	}
 
 	return echoutil.RenderNodx(
-		c, http.StatusOK, listRestorations(queryData, pagination, restorations),
+		c, http.StatusOK, listRestorations(reqCtx, queryData, pagination, restorations),
 	)
 }
 
 func listRestorations(
+	reqCtx reqctx.Ctx,
 	queryData listResQueryData,
 	pagination paginateutil.PaginateResponse,
 	restorations []dbgen.RestorationsServicePaginateRestorationsRow,
@@ -74,7 +77,7 @@ func listRestorations(
 	for _, restoration := range restorations {
 		trs = append(trs, nodx.Tr(
 			nodx.Td(
-				showRestorationButton(restoration),
+				showRestorationButton(reqCtx, restoration),
 			),
 			nodx.Td(component.StatusBadge(restoration.Status)),
 			nodx.Td(component.SpanText(restoration.BackupName)),

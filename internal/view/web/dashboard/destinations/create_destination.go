@@ -2,8 +2,10 @@ package destinations
 
 import (
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/labstack/echo/v4"
@@ -49,7 +51,14 @@ func (h *handlers) createDestinationHandler(c echo.Context) error {
 	return respondhtmx.Redirect(c, pathutil.BuildPath("/dashboard/destinations"))
 }
 
-func createDestinationButton() nodx.Node {
+func createDestinationButton(reqCtx reqctx.Ctx) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	htmxAttributes := func(url string) nodx.Node {
 		return nodx.Group(
 			htmx.HxPost(pathutil.BuildPath(url)),
@@ -62,7 +71,7 @@ func createDestinationButton() nodx.Node {
 
 	mo := component.Modal(component.ModalParams{
 		Size:  component.SizeMd,
-		Title: "Add destination",
+		Title: t("Add destination"),
 		Content: []nodx.Node{
 			nodx.FormEl(
 				nodx.Id("add-destination-form"),
@@ -70,7 +79,7 @@ func createDestinationButton() nodx.Node {
 
 				component.InputControl(component.InputControlParams{
 					Name:        "name",
-					Label:       "Name",
+					Label:       t("Name"),
 					Placeholder: "My destination",
 					Required:    true,
 					Type:        component.InputTypeText,
@@ -79,7 +88,7 @@ func createDestinationButton() nodx.Node {
 
 				component.InputControl(component.InputControlParams{
 					Name:        "bucket_name",
-					Label:       "Bucket name",
+					Label:       t("Bucket name"),
 					Placeholder: "my-bucket",
 					Required:    true,
 					Type:        component.InputTypeText,
@@ -87,7 +96,7 @@ func createDestinationButton() nodx.Node {
 
 				component.InputControl(component.InputControlParams{
 					Name:        "endpoint",
-					Label:       "Endpoint",
+					Label:       t("Endpoint"),
 					Placeholder: "s3-us-west-1.amazonaws.com",
 					Required:    true,
 					Type:        component.InputTypeText,
@@ -95,7 +104,7 @@ func createDestinationButton() nodx.Node {
 
 				component.InputControl(component.InputControlParams{
 					Name:        "region",
-					Label:       "Region",
+					Label:       t("Region"),
 					Placeholder: "us-west-1",
 					Required:    true,
 					Type:        component.InputTypeText,
@@ -103,8 +112,8 @@ func createDestinationButton() nodx.Node {
 
 				component.InputControl(component.InputControlParams{
 					Name:        "access_key",
-					Label:       "Access key",
-					Placeholder: "Access key",
+					Label:       t("Access key"),
+					Placeholder: t("Access key"),
 					Required:    true,
 					Type:        component.InputTypeText,
 					HelpText:    "It will be stored securely using PGP encryption.",
@@ -112,8 +121,8 @@ func createDestinationButton() nodx.Node {
 
 				component.InputControl(component.InputControlParams{
 					Name:        "secret_key",
-					Label:       "Secret key",
-					Placeholder: "Secret key",
+					Label:       t("Secret key"),
+					Placeholder: t("Secret key"),
 					Required:    true,
 					Type:        component.InputTypeText,
 					HelpText:    "It will be stored securely using PGP encryption.",
@@ -127,7 +136,7 @@ func createDestinationButton() nodx.Node {
 						htmxAttributes("/dashboard/destinations/test"),
 						nodx.Class("add-destination-btn btn btn-neutral btn-outline"),
 						nodx.Type("button"),
-						component.SpanText("Test connection"),
+						component.SpanText(t("Test connection")),
 						lucide.PlugZap(),
 					),
 				),
@@ -138,7 +147,7 @@ func createDestinationButton() nodx.Node {
 						htmxAttributes("/dashboard/destinations"),
 						nodx.Class("add-destination-btn btn btn-primary"),
 						nodx.Type("button"),
-						component.SpanText("Add destination"),
+						component.SpanText(t("Add destination")),
 						lucide.Save(),
 					),
 				),
@@ -149,7 +158,7 @@ func createDestinationButton() nodx.Node {
 	button := nodx.Button(
 		mo.OpenerAttr,
 		nodx.Class("btn btn-primary"),
-		component.SpanText("Add destination"),
+		component.SpanText(t("Add destination")),
 		lucide.Plus(),
 	)
 

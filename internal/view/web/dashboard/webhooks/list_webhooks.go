@@ -12,6 +12,7 @@ import (
 	"github.com/eduardolat/pgbackweb/internal/util/strutil"
 	"github.com/eduardolat/pgbackweb/internal/util/timeutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/labstack/echo/v4"
@@ -21,6 +22,7 @@ import (
 
 func (h *handlers) listWebhooksHandler(c echo.Context) error {
 	ctx := c.Request().Context()
+	reqCtx := reqctx.GetCtx(c)
 
 	var formData struct {
 		Page int `query:"page" validate:"required,min=1"`
@@ -43,11 +45,12 @@ func (h *handlers) listWebhooksHandler(c echo.Context) error {
 	}
 
 	return echoutil.RenderNodx(
-		c, http.StatusOK, listWebhooks(pagination, whooks),
+		c, http.StatusOK, listWebhooks(reqCtx, pagination, whooks),
 	)
 }
 
 func listWebhooks(
+	reqCtx reqctx.Ctx,
 	pagination paginateutil.PaginateResponse,
 	whooks []dbgen.Webhook,
 ) nodx.Node {
@@ -62,11 +65,11 @@ func listWebhooks(
 	for _, whook := range whooks {
 		trs = append(trs, nodx.Tr(
 			nodx.Td(component.OptionsDropdown(
-				webhookExecutionsButton(whook.ID),
-				runWebhookButton(whook.ID),
-				editWebhookButton(whook.ID),
-				duplicateWebhookButton(whook.ID),
-				deleteWebhookButton(whook.ID),
+				webhookExecutionsButton(reqCtx, whook.ID),
+				runWebhookButton(reqCtx, whook.ID),
+				editWebhookButton(reqCtx, whook.ID),
+				duplicateWebhookButton(reqCtx, whook.ID),
+				deleteWebhookButton(reqCtx, whook.ID),
 			)),
 			nodx.Td(
 				nodx.Div(

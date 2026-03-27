@@ -3,6 +3,7 @@ package auth
 import (
 	"net/http"
 
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/logger"
 	"github.com/eduardolat/pgbackweb/internal/util/echoutil"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
@@ -38,8 +39,15 @@ func (h *handlers) loginPageHandler(c echo.Context) error {
 }
 
 func loginPage(lang string) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[lang][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	content := []nodx.Node{
-		component.H1Text("Login"),
+		component.H1Text(t("Login")),
 
 		nodx.FormEl(
 			htmx.HxPost(pathutil.BuildPath("/auth/login")),
@@ -48,7 +56,7 @@ func loginPage(lang string) nodx.Node {
 
 			component.InputControl(component.InputControlParams{
 				Name:         "email",
-				Label:        "Email",
+				Label:        t("Email"),
 				Placeholder:  "john@example.com",
 				Required:     true,
 				Type:         component.InputTypeEmail,
@@ -60,7 +68,7 @@ func loginPage(lang string) nodx.Node {
 
 			component.InputControl(component.InputControlParams{
 				Name:         "password",
-				Label:        "Password",
+				Label:        t("Password"),
 				Placeholder:  "******",
 				Required:     true,
 				Type:         component.InputTypePassword,
@@ -73,7 +81,7 @@ func loginPage(lang string) nodx.Node {
 				nodx.Button(
 					nodx.Class("btn btn-primary"),
 					nodx.Type("submit"),
-					component.SpanText("Login"),
+					component.SpanText(t("Login")),
 					lucide.LogIn(),
 				),
 			),

@@ -5,19 +5,29 @@ import (
 	"slices"
 
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/service/webhooks"
 	"github.com/eduardolat/pgbackweb/internal/util/maputil"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	nodx "github.com/nodxdev/nodxgo"
 	alpine "github.com/nodxdev/nodxgo-alpine"
 )
 
 func createAndUpdateWebhookForm(
+	reqCtx reqctx.Ctx,
 	databases []dbgen.DatabasesServiceGetAllDatabasesRow,
 	destinations []dbgen.DestinationsServiceGetAllDestinationsRow,
 	backups []dbgen.Backup,
 	webhook ...dbgen.Webhook,
 ) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	shouldPrefill, pickedWebhook := false, dbgen.Webhook{}
 	if len(webhook) > 0 {
 		shouldPrefill = true
@@ -26,7 +36,7 @@ func createAndUpdateWebhookForm(
 
 	eventTypeOptions := nodx.Group(
 		nodx.Option(
-			nodx.Text("Select an event type"),
+			nodx.Text(t("Select an event type")),
 			nodx.Disabled(""),
 			nodx.If(
 				!shouldPrefill,
@@ -202,7 +212,7 @@ func createAndUpdateWebhookForm(
 			Label:    "Event type",
 			Required: true,
 			HelpButtonChildren: []nodx.Node{
-				component.H3Text("Event types"),
+				component.H3Text(t("Event types")),
 				component.PText(`
 					These are the event types that can trigger a webhook.
 				`),
@@ -211,7 +221,7 @@ func createAndUpdateWebhookForm(
 					nodx.Class("space-y-2"),
 
 					component.CardBoxSimple(
-						component.H4Text("Database healthy"),
+						component.H4Text(t("Database healthy")),
 						component.PText(`
 							This event will be triggered when a database changes it's
 							health status from unhealthy to healthy.
@@ -219,7 +229,7 @@ func createAndUpdateWebhookForm(
 					),
 
 					component.CardBoxSimple(
-						component.H4Text("Database unhealthy"),
+						component.H4Text(t("Database unhealthy")),
 						component.PText(`
 							This event will be triggered when a database changes it's
 							health status from healthy to unhealthy.
@@ -227,7 +237,7 @@ func createAndUpdateWebhookForm(
 					),
 
 					component.CardBoxSimple(
-						component.H4Text("Destination healthy"),
+						component.H4Text(t("Destination healthy")),
 						component.PText(`
 							This event will be triggered when a destination changes it's
 							health status from unhealthy to healthy.
@@ -235,7 +245,7 @@ func createAndUpdateWebhookForm(
 					),
 
 					component.CardBoxSimple(
-						component.H4Text("Destination unhealthy"),
+						component.H4Text(t("Destination unhealthy")),
 						component.PText(`
 							This event will be triggered when a destination changes it's
 							health status from healthy to unhealthy.
@@ -243,7 +253,7 @@ func createAndUpdateWebhookForm(
 					),
 
 					component.CardBoxSimple(
-						component.H4Text("Execution success"),
+						component.H4Text(t("Execution success")),
 						component.PText(`
 							This event will be triggered when a backup execution is
 							successful.
@@ -251,7 +261,7 @@ func createAndUpdateWebhookForm(
 					),
 
 					component.CardBoxSimple(
-						component.H4Text("Execution failed"),
+						component.H4Text(t("Execution failed")),
 						component.PText(`
 							This event will be triggered when a backup execution fails.
 						`),
@@ -272,12 +282,12 @@ func createAndUpdateWebhookForm(
 			Required: true,
 			Children: []nodx.Node{
 				nodx.Option(
-					nodx.Value("true"), nodx.Text("Yes"),
+					nodx.Value("true"), nodx.Text(t("Yes")),
 					nodx.If(!shouldPrefill, nodx.Selected("")),
 					nodx.If(shouldPrefill && pickedWebhook.IsActive, nodx.Selected("")),
 				),
 				nodx.Option(
-					nodx.Value("false"), nodx.Text("No"),
+					nodx.Value("false"), nodx.Text(t("No")),
 					nodx.If(shouldPrefill && !pickedWebhook.IsActive, nodx.Selected("")),
 				),
 			},
@@ -301,7 +311,7 @@ func createAndUpdateWebhookForm(
 			Children: []nodx.Node{
 				nodx.Option(
 					nodx.Value("POST"),
-					nodx.Text("POST"),
+					nodx.Text(t("POST")),
 					nodx.If(!shouldPrefill, nodx.Selected("")),
 					nodx.If(
 						shouldPrefill && pickedWebhook.Method == "POST",
@@ -310,7 +320,7 @@ func createAndUpdateWebhookForm(
 				),
 				nodx.Option(
 					nodx.Value("GET"),
-					nodx.Text("GET"),
+					nodx.Text(t("GET")),
 					nodx.If(
 						shouldPrefill && pickedWebhook.Method == "GET",
 						nodx.Selected(""),

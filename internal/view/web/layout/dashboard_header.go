@@ -1,6 +1,7 @@
 package layout
 
 import (
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	nodx "github.com/nodxdev/nodxgo"
@@ -9,6 +10,13 @@ import (
 )
 
 func dashboardHeader(lang string) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[lang][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	return nodx.Header(
 		nodx.ClassMap{
 			"sticky top-0 z-50":                 true,
@@ -39,7 +47,7 @@ func dashboardHeader(lang string) nodx.Node {
 				htmx.HxPost(pathutil.BuildPath("/auth/logout")),
 				htmx.HxDisabledELT("this"),
 				nodx.Class("btn btn-ghost btn-neutral"),
-				component.SpanText("Log out"),
+				nodx.SpanEl(nodx.Text(t("Log out"))),
 				lucide.LogOut(),
 			),
 		),

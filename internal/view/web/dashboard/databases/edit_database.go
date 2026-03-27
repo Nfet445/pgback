@@ -4,8 +4,10 @@ import (
 	"database/sql"
 
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/google/uuid"
@@ -47,8 +49,11 @@ func (h *handlers) editDatabaseHandler(c echo.Context) error {
 }
 
 func editDatabaseButton(
+	reqCtx reqctx.Ctx,
 	database dbgen.DatabasesServicePaginateDatabasesRow,
 ) nodx.Node {
+	t := func(key string) string { if val, ok := i18n.Translations[reqCtx.Language][key]; ok { return val }; return key }
+
 	idPref := "edit-database-" + database.ID.String()
 	formID := idPref + "-form"
 	btnClass := idPref + "-btn"
@@ -66,7 +71,7 @@ func editDatabaseButton(
 
 	mo := component.Modal(component.ModalParams{
 		Size:  component.SizeMd,
-		Title: "Edit database",
+		Title: t("Edit database"),
 		Content: []nodx.Node{
 			nodx.FormEl(
 				nodx.Id(formID),
@@ -74,7 +79,7 @@ func editDatabaseButton(
 
 				component.InputControl(component.InputControlParams{
 					Name:        "name",
-					Label:       "Name",
+					Label:       t("Name"),
 					Placeholder: "My database",
 					Required:    true,
 					Type:        component.InputTypeText,
@@ -86,7 +91,7 @@ func editDatabaseButton(
 
 				component.SelectControl(component.SelectControlParams{
 					Name:     "version",
-					Label:    "Version",
+					Label:    t("Version"),
 					Required: true,
 					HelpText: "The version of the database",
 					Children: []nodx.Node{
@@ -99,7 +104,7 @@ func editDatabaseButton(
 
 				component.InputControl(component.InputControlParams{
 					Name:        "connection_string",
-					Label:       "Connection string",
+					Label:       t("Connection string"),
 					Placeholder: "postgresql://user:password@localhost:5432/mydb",
 					Required:    true,
 					Type:        component.InputTypeText,
@@ -120,7 +125,7 @@ func editDatabaseButton(
 							"btn btn-neutral btn-outline": true,
 						},
 						nodx.Type("button"),
-						component.SpanText("Test connection"),
+						component.SpanText(t("Test connection")),
 						lucide.DatabaseZap(),
 					),
 				),
@@ -134,7 +139,7 @@ func editDatabaseButton(
 							"btn btn-primary": true,
 						},
 						nodx.Type("button"),
-						component.SpanText("Save"),
+						component.SpanText(t("Save")),
 						lucide.Save(),
 					),
 				),
@@ -147,7 +152,7 @@ func editDatabaseButton(
 		component.OptionsDropdownButton(
 			mo.OpenerAttr,
 			lucide.Pencil(),
-			component.SpanText("Edit database"),
+			component.SpanText(t("Edit database")),
 		),
 	)
 }

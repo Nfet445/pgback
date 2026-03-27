@@ -4,8 +4,10 @@ import (
 	"database/sql"
 
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/google/uuid"
@@ -50,8 +52,16 @@ func (h *handlers) editDestinationHandler(c echo.Context) error {
 }
 
 func editDestinationButton(
+	reqCtx reqctx.Ctx,
 	destination dbgen.DestinationsServicePaginateDestinationsRow,
 ) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	idPref := "edit-destination-" + destination.ID.String()
 	formID := idPref + "-form"
 	btnClass := idPref + "-btn"
@@ -69,7 +79,7 @@ func editDestinationButton(
 
 	mo := component.Modal(component.ModalParams{
 		Size:  component.SizeMd,
-		Title: "Edit destination",
+		Title: t("Edit destination"),
 		Content: []nodx.Node{
 			nodx.FormEl(
 				nodx.Id(formID),
@@ -77,7 +87,7 @@ func editDestinationButton(
 
 				component.InputControl(component.InputControlParams{
 					Name:        "name",
-					Label:       "Name",
+					Label:       t("Name"),
 					Placeholder: "My destination",
 					Required:    true,
 					Type:        component.InputTypeText,
@@ -89,7 +99,7 @@ func editDestinationButton(
 
 				component.InputControl(component.InputControlParams{
 					Name:        "bucket_name",
-					Label:       "Bucket name",
+					Label:       t("Bucket name"),
 					Placeholder: "my-bucket",
 					Required:    true,
 					Type:        component.InputTypeText,
@@ -100,7 +110,7 @@ func editDestinationButton(
 
 				component.InputControl(component.InputControlParams{
 					Name:        "endpoint",
-					Label:       "Endpoint",
+					Label:       t("Endpoint"),
 					Placeholder: "s3-us-west-1.amazonaws.com",
 					Required:    true,
 					Type:        component.InputTypeText,
@@ -111,7 +121,7 @@ func editDestinationButton(
 
 				component.InputControl(component.InputControlParams{
 					Name:        "region",
-					Label:       "Region",
+					Label:       t("Region"),
 					Placeholder: "us-west-1",
 					Required:    true,
 					Type:        component.InputTypeText,
@@ -122,8 +132,8 @@ func editDestinationButton(
 
 				component.InputControl(component.InputControlParams{
 					Name:        "access_key",
-					Label:       "Access key",
-					Placeholder: "Access key",
+					Label:       t("Access key"),
+					Placeholder: t("Access key"),
 					Required:    true,
 					Type:        component.InputTypeText,
 					HelpText:    "It will be stored securely using PGP encryption.",
@@ -134,8 +144,8 @@ func editDestinationButton(
 
 				component.InputControl(component.InputControlParams{
 					Name:        "secret_key",
-					Label:       "Secret key",
-					Placeholder: "Secret key",
+					Label:       t("Secret key"),
+					Placeholder: t("Secret key"),
 					Required:    true,
 					Type:        component.InputTypeText,
 					HelpText:    "It will be stored securely using PGP encryption.",
@@ -155,7 +165,7 @@ func editDestinationButton(
 							"btn btn-neutral btn-outline": true,
 						},
 						nodx.Type("button"),
-						component.SpanText("Test connection"),
+						component.SpanText(t("Test connection")),
 						lucide.PlugZap(),
 					),
 				),
@@ -169,7 +179,7 @@ func editDestinationButton(
 							"btn btn-primary": true,
 						},
 						nodx.Type("button"),
-						component.SpanText("Save"),
+						component.SpanText(t("Save")),
 						lucide.Save(),
 					),
 				),
@@ -182,7 +192,7 @@ func editDestinationButton(
 		component.OptionsDropdownButton(
 			mo.OpenerAttr,
 			lucide.Pencil(),
-			component.SpanText("Edit destination"),
+			component.SpanText(t("Edit destination")),
 		),
 	)
 }

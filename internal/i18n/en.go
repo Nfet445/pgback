@@ -60,6 +60,8 @@ var enTranslations = map[string]string{
 	"Description":      "Description",
 	"Created at":       "Created at",
 	"Updated at":       "Updated at",
+	"PostgreSQL":       "PostgreSQL",
+	"Are you sure you want to delete this database?": "Are you sure you want to delete this database?",
 	"Chart waiting for data": "Chart waiting for data",
 	"Quantity":         "Quantity",
 }

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/eduardolat/pgbackweb/internal/config"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/echoutil"
 	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
@@ -18,8 +19,15 @@ func (h *handlers) indexPageHandler(c echo.Context) error {
 }
 
 func indexPage(reqCtx reqctx.Ctx) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	content := []nodx.Node{
-		component.H1Text("About PG Back Web"),
+		component.H1Text(t("About PG Back Web")),
 		component.H2Text(config.Version),
 
 		nodx.Div(
@@ -43,18 +51,18 @@ func indexPage(reqCtx reqctx.Ctx) nodx.Node {
 					nodx.Table(
 						nodx.Class("table"),
 						nodx.Tr(
-							nodx.Th(component.SpanText("License")),
+							nodx.Th(component.SpanText(t("License"))),
 							nodx.Td(
 								nodx.A(
 									nodx.Class("link"),
 									nodx.Href("https://github.com/eduardolat/pgbackweb/blob/main/LICENSE"),
 									nodx.Target("_blank"),
-									component.SpanText("AGPL v3"),
+									component.SpanText(t("AGPL v3")),
 								),
 							),
 						),
 						nodx.Tr(
-							nodx.Th(component.SpanText("About the author")),
+							nodx.Th(component.SpanText(t("About the author"))),
 							nodx.Td(
 								nodx.A(
 									nodx.Class("link"),
@@ -65,7 +73,7 @@ func indexPage(reqCtx reqctx.Ctx) nodx.Node {
 							),
 						),
 						nodx.Tr(
-							nodx.Th(component.SpanText("Repository")),
+							nodx.Th(component.SpanText(t("Repository"))),
 							nodx.Td(
 								nodx.A(
 									nodx.Class("link"),

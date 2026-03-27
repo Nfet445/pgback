@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/logger"
 	"github.com/eduardolat/pgbackweb/internal/util/echoutil"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
@@ -39,8 +40,15 @@ func (h *handlers) createFirstUserPageHandler(c echo.Context) error {
 }
 
 func createFirstUserPage(lang string) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[lang][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	content := []nodx.Node{
-		component.H1Text("Create first user"),
+		component.H1Text(t("Create first user")),
 
 		nodx.FormEl(
 			htmx.HxPost(pathutil.BuildPath("/auth/create-first-user")),
@@ -50,7 +58,7 @@ func createFirstUserPage(lang string) nodx.Node {
 			nodx.Div(
 				component.InputControl(component.InputControlParams{
 					Name:         "name",
-					Label:        "Full name",
+					Label:        t("Full name"),
 					Placeholder:  "John Doe",
 					Required:     true,
 					Type:         component.InputTypeText,
@@ -62,7 +70,7 @@ func createFirstUserPage(lang string) nodx.Node {
 
 				component.InputControl(component.InputControlParams{
 					Name:         "email",
-					Label:        "Email",
+					Label:        t("Email"),
 					Placeholder:  "john@example.com",
 					Required:     true,
 					Type:         component.InputTypeEmail,
@@ -71,7 +79,7 @@ func createFirstUserPage(lang string) nodx.Node {
 
 				component.InputControl(component.InputControlParams{
 					Name:         "password",
-					Label:        "Password",
+					Label:        t("Password"),
 					Placeholder:  "******",
 					Required:     true,
 					Type:         component.InputTypePassword,
@@ -84,7 +92,7 @@ func createFirstUserPage(lang string) nodx.Node {
 
 				component.InputControl(component.InputControlParams{
 					Name:        "password_confirmation",
-					Label:       "Confirm password",
+					Label:       t("Confirm password"),
 					Placeholder: "******",
 					Required:    true,
 					Type:        component.InputTypePassword,
@@ -101,7 +109,7 @@ func createFirstUserPage(lang string) nodx.Node {
 						nodx.Id("create-first-user-button"),
 						nodx.Class("btn btn-primary"),
 						nodx.Type("submit"),
-						component.SpanText("Create user and continue"),
+						component.SpanText(t("Create user and continue")),
 						lucide.UserPlus(),
 					),
 				),

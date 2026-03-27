@@ -6,9 +6,11 @@ import (
 	"net/http"
 
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/echoutil"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/google/uuid"
@@ -66,6 +68,7 @@ func (h *handlers) editWebhookHandler(c echo.Context) error {
 
 func (h *handlers) editWebhookFormHandler(c echo.Context) error {
 	ctx := c.Request().Context()
+	reqCtx := reqctx.GetCtx(c)
 	webhookID, err := uuid.Parse(c.Param("webhookID"))
 	if err != nil {
 		return respondhtmx.ToastError(c, err.Error())
@@ -92,22 +95,30 @@ func (h *handlers) editWebhookFormHandler(c echo.Context) error {
 	}
 
 	return echoutil.RenderNodx(c, http.StatusOK, editWebhookForm(
-		webhook, databases, destinations, backups,
+		reqCtx, webhook, databases, destinations, backups,
 	))
 }
 
 func editWebhookForm(
+	reqCtx reqctx.Ctx,
 	webhook dbgen.Webhook,
 	databases []dbgen.DatabasesServiceGetAllDatabasesRow,
 	destinations []dbgen.DestinationsServiceGetAllDestinationsRow,
 	backups []dbgen.Backup,
 ) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	return nodx.FormEl(
 		htmx.HxPost(pathutil.BuildPath(fmt.Sprintf("/dashboard/webhooks/%s/edit", webhook.ID))),
 		htmx.HxDisabledELT("find button[type='submit']"),
 		nodx.Class("space-y-2"),
 
-		createAndUpdateWebhookForm(databases, destinations, backups, webhook),
+		createAndUpdateWebhookForm(reqCtx, databases, destinations, backups, webhook),
 
 		nodx.Div(
 			nodx.Class("flex justify-end items-center space-x-2 pt-2"),
@@ -115,17 +126,24 @@ func editWebhookForm(
 			nodx.Button(
 				nodx.Class("btn btn-primary"),
 				nodx.Type("submit"),
-				component.SpanText("Save"),
+				component.SpanText(t("Save")),
 				lucide.Save(),
 			),
 		),
 	)
 }
 
-func editWebhookButton(webhookID uuid.UUID) nodx.Node {
+func editWebhookButton(reqCtx reqctx.Ctx, webhookID uuid.UUID) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	mo := component.Modal(component.ModalParams{
 		Size:  component.SizeLg,
-		Title: "Edit webhook",
+		Title: t("Edit webhook"),
 		Content: []nodx.Node{
 			nodx.Div(
 				htmx.HxGet(pathutil.BuildPath(fmt.Sprintf("/dashboard/webhooks/%s/edit", webhookID))),
@@ -142,7 +160,7 @@ func editWebhookButton(webhookID uuid.UUID) nodx.Node {
 		component.OptionsDropdownButton(
 			mo.OpenerAttr,
 			lucide.Pencil(),
-			component.SpanText("Edit webhook"),
+			component.SpanText(t("Edit webhook")),
 		),
 	)
 }

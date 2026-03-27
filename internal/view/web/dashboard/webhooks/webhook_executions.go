@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/service/webhooks"
 	"github.com/eduardolat/pgbackweb/internal/util/echoutil"
 	"github.com/eduardolat/pgbackweb/internal/util/paginateutil"
@@ -13,6 +14,7 @@ import (
 	"github.com/eduardolat/pgbackweb/internal/util/strutil"
 	"github.com/eduardolat/pgbackweb/internal/util/timeutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/google/uuid"
@@ -25,6 +27,7 @@ import (
 
 func (h *handlers) paginateWebhookExecutionsHandler(c echo.Context) error {
 	ctx := c.Request().Context()
+	reqCtx := reqctx.GetCtx(c)
 	webhookID, err := uuid.Parse(c.Param("webhookID"))
 	if err != nil {
 		return respondhtmx.ToastError(c, err.Error())
@@ -52,15 +55,23 @@ func (h *handlers) paginateWebhookExecutionsHandler(c echo.Context) error {
 	}
 
 	return echoutil.RenderNodx(
-		c, http.StatusOK, webhookExecutionsList(webhookID, pagination, execs),
+		c, http.StatusOK, webhookExecutionsList(reqCtx, webhookID, pagination, execs),
 	)
 }
 
 func webhookExecutionsList(
+	reqCtx reqctx.Ctx,
 	webhookID uuid.UUID,
 	pagination paginateutil.PaginateResponse,
 	execs []dbgen.WebhookExecution,
 ) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	if len(execs) == 0 {
 		return component.EmptyResultsTr(component.EmptyResultsParams{
 			Title:    "No executions found",
@@ -74,9 +85,7 @@ func webhookExecutionsList(
 		duration := time.Duration(durationMillis) * time.Millisecond
 
 		trs = append(trs, nodx.Tr(
-			nodx.Td(
-				webhookExecutionDetailsButton(exec, duration),
-			),
+				nodx.Td(webhookExecutionDetailsButton(reqCtx, exec, duration)),
 			nodx.Td(component.SpanText(fmt.Sprintf("%d", exec.ResStatus.Int16))),
 			nodx.Td(component.SpanText(exec.ReqMethod.String)),
 			nodx.Td(component.SpanText(duration.String())),
@@ -103,9 +112,17 @@ func webhookExecutionsList(
 }
 
 func webhookExecutionDetailsButton(
+	reqCtx reqctx.Ctx,
 	exec dbgen.WebhookExecution,
 	duration time.Duration,
 ) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	mo := component.Modal(component.ModalParams{
 		Title: "Webhook execution details",
 		Content: []nodx.Node{
@@ -133,15 +150,15 @@ func webhookExecutionDetailsButton(
 					nodx.Tr(
 						nodx.Td(
 							nodx.Colspan("100%"),
-							component.H3Text("General"),
+							component.H3Text(t("General")),
 						),
 					),
 					nodx.Tr(
-						nodx.Th(component.SpanText("ID")),
+						nodx.Th(component.SpanText(t("ID"))),
 						nodx.Td(component.SpanText(exec.ID.String())),
 					),
 					nodx.Tr(
-						nodx.Th(component.SpanText("Date")),
+						nodx.Th(component.SpanText(t("Date"))),
 						nodx.Td(component.SpanText(
 							exec.CreatedAt.Local().Format(timeutil.LayoutYYYYMMDDHHMMSSPretty),
 						)),
@@ -153,15 +170,15 @@ func webhookExecutionDetailsButton(
 					nodx.Tr(
 						nodx.Td(
 							nodx.Colspan("100%"),
-							component.H3Text("Request"),
+							component.H3Text(t("Request")),
 						),
 					),
 					nodx.Tr(
-						nodx.Th(component.SpanText("Method")),
+						nodx.Th(component.SpanText(t("Method"))),
 						nodx.Td(component.SpanText(exec.ReqMethod.String)),
 					),
 					nodx.Tr(
-						nodx.Th(component.SpanText("Headers")),
+						nodx.Th(component.SpanText(t("Headers"))),
 						nodx.Td(
 							component.TextareaControl(component.TextareaControlParams{
 								Children: []nodx.Node{
@@ -172,7 +189,7 @@ func webhookExecutionDetailsButton(
 						),
 					),
 					nodx.Tr(
-						nodx.Th(component.SpanText("Body")),
+						nodx.Th(component.SpanText(t("Body"))),
 						nodx.Td(
 							component.TextareaControl(component.TextareaControlParams{
 								Children: []nodx.Node{
@@ -189,21 +206,21 @@ func webhookExecutionDetailsButton(
 					nodx.Tr(
 						nodx.Td(
 							nodx.Colspan("100%"),
-							component.H3Text("Response"),
+							component.H3Text(t("Response")),
 						),
 					),
 					nodx.Tr(
-						nodx.Th(component.SpanText("Status")),
+						nodx.Th(component.SpanText(t("Status"))),
 						nodx.Td(component.SpanText(
 							fmt.Sprintf("%d", exec.ResStatus.Int16),
 						)),
 					),
 					nodx.Tr(
-						nodx.Th(component.SpanText("Duration")),
+						nodx.Th(component.SpanText(t("Duration"))),
 						nodx.Td(component.SpanText(duration.String())),
 					),
 					nodx.Tr(
-						nodx.Th(component.SpanText("Headers")),
+						nodx.Th(component.SpanText(t("Headers"))),
 						nodx.Td(
 							component.TextareaControl(component.TextareaControlParams{
 								Children: []nodx.Node{
@@ -214,7 +231,7 @@ func webhookExecutionDetailsButton(
 						),
 					),
 					nodx.Tr(
-						nodx.Th(component.SpanText("Body")),
+						nodx.Th(component.SpanText(t("Body"))),
 						nodx.Td(
 							component.TextareaControl(component.TextareaControlParams{
 								Children: []nodx.Node{
@@ -241,7 +258,14 @@ func webhookExecutionDetailsButton(
 	)
 }
 
-func webhookExecutionsButton(webhookID uuid.UUID) nodx.Node {
+func webhookExecutionsButton(reqCtx reqctx.Ctx, webhookID uuid.UUID) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	mo := component.Modal(component.ModalParams{
 		Size:  component.SizeMd,
 		Title: "Webhook executions",
@@ -251,10 +275,10 @@ func webhookExecutionsButton(webhookID uuid.UUID) nodx.Node {
 				nodx.Thead(
 					nodx.Tr(
 						nodx.Th(nodx.Class("w-1")),
-						nodx.Th(component.SpanText("Status")),
-						nodx.Th(component.SpanText("Method")),
-						nodx.Th(component.SpanText("Duration")),
-						nodx.Th(component.SpanText("Date")),
+						nodx.Th(component.SpanText(t("Status"))),
+						nodx.Th(component.SpanText(t("Method"))),
+						nodx.Th(component.SpanText(t("Duration"))),
+						nodx.Th(component.SpanText(t("Date"))),
 					),
 				),
 				nodx.Tbody(
@@ -277,7 +301,7 @@ func webhookExecutionsButton(webhookID uuid.UUID) nodx.Node {
 		component.OptionsDropdownButton(
 			mo.OpenerAttr,
 			lucide.List(),
-			component.SpanText("Show executions"),
+			component.SpanText(t("Show executions")),
 		),
 	)
 }

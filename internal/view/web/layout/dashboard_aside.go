@@ -3,6 +3,7 @@ package layout
 import (
 	"fmt"
 
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	nodx "github.com/nodxdev/nodxgo"
 	alpine "github.com/nodxdev/nodxgo-alpine"
@@ -10,7 +11,14 @@ import (
 	lucide "github.com/nodxdev/nodxgo-lucide"
 )
 
-func dashboardAside() nodx.Node {
+func dashboardAside(lang string) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[lang][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	return nodx.Aside(
 		nodx.Id("dashboard-aside"),
 		nodx.ClassMap{
@@ -23,63 +31,63 @@ func dashboardAside() nodx.Node {
 
 			dashboardAsideItem(
 				lucide.LayoutDashboard,
-				"Summary",
+				t("Summary"),
 				pathutil.BuildPath("/dashboard"),
 				true,
 			),
 
 			dashboardAsideItem(
 				lucide.Database,
-				"Databases",
+				t("Databases"),
 				pathutil.BuildPath("/dashboard/databases"),
 				false,
 			),
 
 			dashboardAsideItem(
 				lucide.HardDrive,
-				"Destinations",
+				t("Destinations"),
 				pathutil.BuildPath("/dashboard/destinations"),
 				false,
 			),
 
 			dashboardAsideItem(
 				lucide.DatabaseBackup,
-				"Backup tasks",
+				t("Backup tasks"),
 				pathutil.BuildPath("/dashboard/backups"),
 				false,
 			),
 
 			dashboardAsideItem(
 				lucide.List,
-				"Executions",
+				t("Executions"),
 				pathutil.BuildPath("/dashboard/executions"),
 				false,
 			),
 
 			dashboardAsideItem(
 				lucide.ArchiveRestore,
-				"Restorations",
+				t("Restorations"),
 				pathutil.BuildPath("/dashboard/restorations"),
 				false,
 			),
 
 			dashboardAsideItem(
 				lucide.Webhook,
-				"Webhooks",
+				t("Webhooks"),
 				pathutil.BuildPath("/dashboard/webhooks"),
 				false,
 			),
 
 			dashboardAsideItem(
 				lucide.User,
-				"Profile",
+				t("Profile"),
 				pathutil.BuildPath("/dashboard/profile"),
 				false,
 			),
 
 			dashboardAsideItem(
 				lucide.Info,
-				"About",
+				t("About"),
 				pathutil.BuildPath("/dashboard/about"),
 				false,
 			),

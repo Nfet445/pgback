@@ -6,9 +6,11 @@ import (
 	"net/http"
 
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/echoutil"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/google/uuid"
@@ -82,6 +84,7 @@ func (h *handlers) restoreExecutionHandler(c echo.Context) error {
 
 func (h *handlers) restoreExecutionFormHandler(c echo.Context) error {
 	ctx := c.Request().Context()
+	reqCtx := reqctx.GetCtx(c)
 
 	executionID, err := uuid.Parse(c.Param("executionID"))
 	if err != nil {
@@ -99,14 +102,17 @@ func (h *handlers) restoreExecutionFormHandler(c echo.Context) error {
 	}
 
 	return echoutil.RenderNodx(c, http.StatusOK, restoreExecutionForm(
-		execution, databases,
+		reqCtx, execution, databases,
 	))
 }
 
 func restoreExecutionForm(
+	reqCtx reqctx.Ctx,
 	execution dbgen.ExecutionsServiceGetExecutionRow,
 	databases []dbgen.DatabasesServiceGetAllDatabasesRow,
 ) nodx.Node {
+	t := func(key string) string { if val, ok := i18n.Translations[reqCtx.Language][key]; ok { return val }; return key }
+
 	return nodx.FormEl(
 		htmx.HxPost(pathutil.BuildPath(fmt.Sprintf("/dashboard/executions/%s/restore", execution.ID))),
 		htmx.HxConfirm("Are you sure you want to restore this backup?"),
@@ -125,19 +131,19 @@ func restoreExecutionForm(
 
 			component.SelectControl(component.SelectControlParams{
 				Name:     "backup_to",
-				Label:    "Backup to",
+				Label:    t("Backup"),
 				Required: true,
 				HelpText: "You can restore the backup to an existing database or any other database using a connection string",
 				Children: []nodx.Node{
 					alpine.XModel("backup_to"),
 					nodx.Option(
 						nodx.Value("database"),
-						nodx.Text("Existing database"),
+						nodx.Text(t("Existing database")),
 						nodx.Selected(""),
 					),
 					nodx.Option(
 						nodx.Value("conn_string"),
-						nodx.Text("Other database"),
+						nodx.Text(t("Other database")),
 					),
 				},
 			}),
@@ -146,7 +152,7 @@ func restoreExecutionForm(
 				alpine.XIf("backup_to === 'database'"),
 				component.SelectControl(component.SelectControlParams{
 					Name:        "database_id",
-					Label:       "Database",
+					Label:       t("Database"),
 					Placeholder: "Select a database",
 					Required:    true,
 					Children: []nodx.Node{
@@ -169,12 +175,12 @@ func restoreExecutionForm(
 
 			alpine.Template(
 				alpine.XIf("backup_to === 'conn_string'"),
-				component.InputControl(component.InputControlParams{
-					Name:        "conn_string",
-					Label:       "Connection string",
-					Placeholder: "postgresql://user:password@localhost:5432/mydb",
-					Type:        component.InputTypeText,
-					Required:    true,
+					component.InputControl(component.InputControlParams{
+						Name:        "conn_string",
+						Label:       t("Connection string"),
+						Placeholder: "postgresql://user:password@localhost:5432/mydb",
+						Type:        component.InputTypeText,
+						Required:    true,
 				}),
 			),
 
@@ -205,7 +211,7 @@ func restoreExecutionForm(
 				nodx.Button(
 					nodx.Class("btn btn-primary"),
 					nodx.Type("submit"),
-					component.SpanText("Start restoration"),
+					component.SpanText(t("Start restoration")),
 					lucide.Zap(),
 				),
 			),
@@ -213,14 +219,16 @@ func restoreExecutionForm(
 	)
 }
 
-func restoreExecutionButton(execution dbgen.ExecutionsServicePaginateExecutionsRow) nodx.Node {
+func restoreExecutionButton(reqCtx reqctx.Ctx, execution dbgen.ExecutionsServicePaginateExecutionsRow) nodx.Node {
 	if execution.Status != "success" || !execution.Path.Valid {
 		return nil
 	}
 
+	t := func(key string) string { if val, ok := i18n.Translations[reqCtx.Language][key]; ok { return val }; return key }
+
 	mo := component.Modal(component.ModalParams{
 		Size:  component.SizeMd,
-		Title: "Restore backup execution",
+		Title: t("Restore execution"),
 		Content: []nodx.Node{
 			nodx.Div(
 				htmx.HxGet(pathutil.BuildPath(fmt.Sprintf("/dashboard/executions/%s/restore-form", execution.ID))),
@@ -237,7 +245,7 @@ func restoreExecutionButton(execution dbgen.ExecutionsServicePaginateExecutionsR
 		component.OptionsDropdownButton(
 			mo.OpenerAttr,
 			lucide.ArchiveRestore(),
-			component.SpanText("Restore execution"),
+			component.SpanText(t("Restore execution")),
 		),
 	)
 }

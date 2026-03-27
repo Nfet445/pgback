@@ -4,8 +4,10 @@ import (
 	"database/sql"
 
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/labstack/echo/v4"
@@ -45,7 +47,9 @@ func (h *handlers) createDatabaseHandler(c echo.Context) error {
 	return respondhtmx.Redirect(c, pathutil.BuildPath("/dashboard/databases"))
 }
 
-func createDatabaseButton() nodx.Node {
+func createDatabaseButton(reqCtx reqctx.Ctx) nodx.Node {
+	t := func(key string) string { if val, ok := i18n.Translations[reqCtx.Language][key]; ok { return val }; return key }
+
 	htmxAttributes := func(url string) nodx.Node {
 		return nodx.Group(
 			htmx.HxPost(pathutil.BuildPath(url)),
@@ -58,7 +62,7 @@ func createDatabaseButton() nodx.Node {
 
 	mo := component.Modal(component.ModalParams{
 		Size:  component.SizeMd,
-		Title: "Add database",
+		Title: t("Add database"),
 		Content: []nodx.Node{
 			nodx.FormEl(
 				nodx.Id("add-database-form"),
@@ -66,7 +70,7 @@ func createDatabaseButton() nodx.Node {
 
 				component.InputControl(component.InputControlParams{
 					Name:        "name",
-					Label:       "Name",
+					Label:       t("Name"),
 					Placeholder: "My database",
 					Required:    true,
 					Type:        component.InputTypeText,
@@ -75,7 +79,7 @@ func createDatabaseButton() nodx.Node {
 
 				component.SelectControl(component.SelectControlParams{
 					Name:        "version",
-					Label:       "Version",
+					Label:       t("Version"),
 					Placeholder: "Select a version",
 					Required:    true,
 					HelpText:    "The version of the database",
@@ -86,7 +90,7 @@ func createDatabaseButton() nodx.Node {
 
 				component.InputControl(component.InputControlParams{
 					Name:        "connection_string",
-					Label:       "Connection string",
+					Label:       t("Connection string"),
 					Placeholder: "postgresql://user:password@localhost:5432/mydb",
 					Required:    true,
 					Type:        component.InputTypeText,
@@ -101,7 +105,7 @@ func createDatabaseButton() nodx.Node {
 						htmxAttributes("/dashboard/databases/test"),
 						nodx.Class("add-database-btn btn btn-neutral btn-outline"),
 						nodx.Type("button"),
-						component.SpanText("Test connection"),
+						component.SpanText(t("Test connection")),
 						lucide.DatabaseZap(),
 					),
 				),
@@ -112,7 +116,7 @@ func createDatabaseButton() nodx.Node {
 						htmxAttributes("/dashboard/databases"),
 						nodx.Class("add-database-btn btn btn-primary"),
 						nodx.Type("button"),
-						component.SpanText("Add database"),
+						component.SpanText(t("Add database")),
 						lucide.Save(),
 					),
 				),
@@ -123,7 +127,7 @@ func createDatabaseButton() nodx.Node {
 	button := nodx.Button(
 		mo.OpenerAttr,
 		nodx.Class("btn btn-primary"),
-		component.SpanText("Add database"),
+		component.SpanText(t("Add database")),
 		lucide.Plus(),
 	)
 

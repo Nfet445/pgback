@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/echoutil"
 	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
@@ -56,6 +57,13 @@ func indexPage(
 	executionsQty dbgen.ExecutionsServiceGetExecutionsQtyRow,
 	restorationsQty dbgen.RestorationsServiceGetRestorationsQtyRow,
 ) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	type ChartData struct {
 		Label    string
 		Labels   []string
@@ -73,7 +81,7 @@ func indexPage(
 				nodx.Class("size-[218px] flex flex-col justify-center items-center"),
 				nodx.SpanEl(
 					nodx.Class("text-sm text-base-content pb-[32px]"),
-					nodx.Text("Chart waiting for data"),
+					nodx.Text(t("Chart waiting for data")),
 				),
 			)
 
@@ -155,41 +163,41 @@ func indexPage(
 
 	content := []nodx.Node{
 		nodx.Div(
-			component.H1Text("Summary"),
+			component.H1Text(t("Summary")),
 		),
 		nodx.Div(
 			nodx.Class("mt-4 flex justify-start flex-wrap gap-4"),
 
-			countCard("Databases", databasesQty.All, ChartData{
-				Label:    "Quantity",
-				Labels:   []string{"Healthy", "Unhealthy"},
+			countCard(t("Databases"), databasesQty.All, ChartData{
+				Label:    t("Quantity"),
+				Labels:   []string{t("Healthy"), t("Unhealthy")},
 				Data:     []int32{databasesQty.Healthy, databasesQty.Unhealthy},
 				BgColors: []string{greenColor, redColor},
 			}),
-			countCard("Destinations", destinationsQty.All, ChartData{
-				Label:    "Quantity",
-				Labels:   []string{"Healthy", "Unhealthy"},
+			countCard(t("Destinations"), destinationsQty.All, ChartData{
+				Label:    t("Quantity"),
+				Labels:   []string{t("Healthy"), t("Unhealthy")},
 				Data:     []int32{destinationsQty.Healthy, destinationsQty.Unhealthy},
 				BgColors: []string{greenColor, redColor},
 			}),
-			countCard("Backup tasks", backupsQty.All, ChartData{
-				Label:    "Quantity",
-				Labels:   []string{"Active", "Inactive"},
+			countCard(t("Backup tasks"), backupsQty.All, ChartData{
+				Label:    t("Quantity"),
+				Labels:   []string{t("Active"), t("Inactive")},
 				Data:     []int32{backupsQty.Active, backupsQty.Inactive},
 				BgColors: []string{greenColor, redColor},
 			}),
-			countCard("Executions", executionsQty.All, ChartData{
-				Label:  "Status",
-				Labels: []string{"Running", "Success", "Failed", "Deleted"},
+			countCard(t("Executions"), executionsQty.All, ChartData{
+				Label:  t("Status"),
+				Labels: []string{t("Running"), t("Success"), t("Failed"), t("Deleted")},
 				Data: []int32{
 					executionsQty.Running, executionsQty.Success, executionsQty.Failed,
 					executionsQty.Deleted,
 				},
 				BgColors: []string{blueColor, greenColor, redColor, yellowColor},
 			}),
-			countCard("Restorations", restorationsQty.All, ChartData{
-				Label:  "Status",
-				Labels: []string{"Running", "Success", "Failed"},
+			countCard(t("Restorations"), restorationsQty.All, ChartData{
+				Label:  t("Status"),
+				Labels: []string{t("Running"), t("Success"), t("Failed")},
 				Data: []int32{
 					restorationsQty.Running, restorationsQty.Success,
 					restorationsQty.Failed,

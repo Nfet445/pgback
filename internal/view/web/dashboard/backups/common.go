@@ -3,14 +3,23 @@ package backups
 import (
 	"time"
 
+	"github.com/eduardolat/pgbackweb/internal/i18n"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	nodx "github.com/nodxdev/nodxgo"
 	lucide "github.com/nodxdev/nodxgo-lucide"
 )
 
-func localBackupsHelp() []nodx.Node {
+func localBackupsHelp(reqCtx reqctx.Ctx) []nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	return []nodx.Node{
-		component.H3Text("Local backups"),
+		component.H3Text(t("Local backups")),
 		component.PText(`
 			Local backups are stored in the server where PG Back Web is running.
 			They are stored under /backups directory so you can mount a docker
@@ -19,7 +28,7 @@ func localBackupsHelp() []nodx.Node {
 
 		nodx.Div(
 			nodx.Class("mt-2"),
-			component.H3Text("Remote backups"),
+			component.H3Text(t("Remote backups")),
 			component.PText(`
 				Remote backups are stored in a destination. A destination is a remote
 				S3 compatible storage. With this option you don't need to worry about
@@ -29,7 +38,14 @@ func localBackupsHelp() []nodx.Node {
 	}
 }
 
-func cronExpressionHelp() []nodx.Node {
+func cronExpressionHelp(reqCtx reqctx.Ctx) []nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	return []nodx.Node{
 		component.PText(`
 			A cron expression is a string used to define a schedule for running tasks
@@ -44,21 +60,28 @@ func cronExpressionHelp() []nodx.Node {
 				nodx.Href("https://en.wikipedia.org/wiki/Cron"),
 				nodx.Target("_blank"),
 				nodx.Class("btn btn-ghost"),
-				component.SpanText("Learn more"),
+				component.SpanText(t("Learn more")),
 				lucide.ExternalLink(),
 			),
 			nodx.A(
 				nodx.Href("https://crontab.guru/examples.html"),
 				nodx.Target("_blank"),
 				nodx.Class("btn btn-ghost"),
-				component.SpanText("Examples & common expressions"),
+				component.SpanText(t("Examples & common expressions")),
 				lucide.ExternalLink(),
 			),
 		),
 	}
 }
 
-func timezoneFilenamesHelp() []nodx.Node {
+func timezoneFilenamesHelp(reqCtx reqctx.Ctx) []nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	serverTimezone := time.Now().Location().String()
 
 	return []nodx.Node{
@@ -79,14 +102,21 @@ func timezoneFilenamesHelp() []nodx.Node {
 				nodx.Href("https://github.com/eduardolat/pgbackweb?tab=readme-ov-file#configuration"),
 				nodx.Target("_blank"),
 				nodx.Class("btn btn-ghost"),
-				component.SpanText("Learn more in project README"),
+				component.SpanText(t("Learn more in project README")),
 				lucide.ExternalLink(),
 			),
 		),
 	}
 }
 
-func destinationDirectoryHelp() []nodx.Node {
+func destinationDirectoryHelp(reqCtx reqctx.Ctx) []nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	return []nodx.Node{
 		component.PText(`
 			The destination directory is the directory where the backups will be
@@ -97,7 +127,7 @@ func destinationDirectoryHelp() []nodx.Node {
 
 		nodx.Div(
 			nodx.Class("mt-2"),
-			component.H3Text("Local backups"),
+			component.H3Text(t("Local backups")),
 			component.PText(`
 				For local backups, the base directory is /backups. So, the backup files
 				will be stored in:
@@ -116,7 +146,7 @@ func destinationDirectoryHelp() []nodx.Node {
 
 		nodx.Div(
 			nodx.Class("mt-2"),
-			component.H3Text("Remote backups"),
+			component.H3Text(t("Remote backups")),
 			component.PText(`
 				For remote backups, the base directory is the root of the bucket. So,
 				the backup files will be stored in:
@@ -153,7 +183,14 @@ func retentionDaysHelp() []nodx.Node {
 	}
 }
 
-func pgDumpOptionsHelp() []nodx.Node {
+func pgDumpOptionsHelp(reqCtx reqctx.Ctx) []nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	return []nodx.Node{
 		nodx.Div(
 			nodx.Class("space-y-2"),
@@ -174,7 +211,7 @@ func pgDumpOptionsHelp() []nodx.Node {
 					nodx.Class("btn btn-ghost"),
 					nodx.Href("https://www.postgresql.org/docs/current/app-pgdump.html"),
 					nodx.Target("_blank"),
-					component.SpanText("Learn more in pg_dump documentation"),
+					component.SpanText(t("Learn more in pg_dump documentation")),
 					lucide.ExternalLink(nodx.Class("ml-1")),
 				),
 			),

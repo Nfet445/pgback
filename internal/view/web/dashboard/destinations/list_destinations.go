@@ -5,12 +5,14 @@ import (
 	"net/http"
 
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/service/destinations"
 	"github.com/eduardolat/pgbackweb/internal/util/echoutil"
 	"github.com/eduardolat/pgbackweb/internal/util/paginateutil"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/util/timeutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/labstack/echo/v4"
@@ -21,6 +23,7 @@ import (
 
 func (h *handlers) listDestinationsHandler(c echo.Context) error {
 	ctx := c.Request().Context()
+	reqCtx := reqctx.GetCtx(c)
 
 	var formData struct {
 		Page int `query:"page" validate:"required,min=1"`
@@ -43,14 +46,22 @@ func (h *handlers) listDestinationsHandler(c echo.Context) error {
 	}
 
 	return echoutil.RenderNodx(
-		c, http.StatusOK, listDestinations(pagination, destinations),
+		c, http.StatusOK, listDestinations(reqCtx, pagination, destinations),
 	)
 }
 
 func listDestinations(
+	reqCtx reqctx.Ctx,
 	pagination paginateutil.PaginateResponse,
 	destinations []dbgen.DestinationsServicePaginateDestinationsRow,
 ) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	if len(destinations) < 1 {
 		return component.EmptyResultsTr(component.EmptyResultsParams{
 			Title:    "No destinations found",
@@ -68,16 +79,16 @@ func listDestinations(
 					)),
 					nodx.Target("_blank"),
 					lucide.List(),
-					component.SpanText("Show executions"),
+					component.SpanText(t("Show executions")),
 				),
-				editDestinationButton(destination),
+				editDestinationButton(reqCtx, destination),
 				component.OptionsDropdownButton(
 					htmx.HxPost(pathutil.BuildPath(fmt.Sprintf("/dashboard/destinations/%s/test", destination.ID))),
 					htmx.HxDisabledELT("this"),
 					lucide.PlugZap(),
-					component.SpanText("Test connection"),
+					component.SpanText(t("Test connection")),
 				),
-				deleteDestinationButton(destination.ID),
+				deleteDestinationButton(reqCtx, destination.ID),
 			)),
 			nodx.Td(
 				nodx.Div(

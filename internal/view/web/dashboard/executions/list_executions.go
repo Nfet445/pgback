@@ -12,6 +12,7 @@ import (
 	"github.com/eduardolat/pgbackweb/internal/util/strutil"
 	"github.com/eduardolat/pgbackweb/internal/util/timeutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/google/uuid"
@@ -29,6 +30,7 @@ type listExecsQueryData struct {
 
 func (h *handlers) listExecutionsHandler(c echo.Context) error {
 	ctx := c.Request().Context()
+	reqCtx := reqctx.GetCtx(c)
 
 	var queryData listExecsQueryData
 	if err := c.Bind(&queryData); err != nil {
@@ -58,11 +60,12 @@ func (h *handlers) listExecutionsHandler(c echo.Context) error {
 	}
 
 	return echoutil.RenderNodx(
-		c, http.StatusOK, listExecutions(queryData, pagination, executions),
+		c, http.StatusOK, listExecutions(reqCtx, queryData, pagination, executions),
 	)
 }
 
 func listExecutions(
+	reqCtx reqctx.Ctx,
 	queryData listExecsQueryData,
 	pagination paginateutil.PaginateResponse,
 	executions []dbgen.ExecutionsServicePaginateExecutionsRow,
@@ -78,8 +81,8 @@ func listExecutions(
 	for _, execution := range executions {
 		trs = append(trs, nodx.Tr(
 			nodx.Td(component.OptionsDropdown(
-				showExecutionButton(execution),
-				restoreExecutionButton(execution),
+				showExecutionButton(reqCtx, execution),
+				restoreExecutionButton(reqCtx, execution),
 			)),
 			nodx.Td(component.StatusBadge(execution.Status)),
 			nodx.Td(component.SpanText(execution.BackupName)),

@@ -3,6 +3,7 @@ package destinations
 import (
 	"net/http"
 
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/echoutil"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
@@ -19,11 +20,18 @@ func (h *handlers) indexPageHandler(c echo.Context) error {
 }
 
 func indexPage(reqCtx reqctx.Ctx) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	content := []nodx.Node{
 		nodx.Div(
 			nodx.Class("flex justify-between items-start space-x-2"),
 			nodx.Div(
-				component.H1Text("S3 Destinations"),
+				component.H1Text(t("S3 Destinations")),
 				component.PText(`
 					Here you can manage your S3 destinations. You can skip creating a S3
 					destination if you want to use the local storage for your backups.
@@ -31,7 +39,7 @@ func indexPage(reqCtx reqctx.Ctx) nodx.Node {
 			),
 			nodx.Div(
 				nodx.Class("flex-none"),
-				createDestinationButton(),
+				createDestinationButton(reqCtx),
 			),
 		),
 
@@ -45,13 +53,13 @@ func indexPage(reqCtx reqctx.Ctx) nodx.Node {
 						nodx.Thead(
 							nodx.Tr(
 								nodx.Th(nodx.Class("w-1")),
-								nodx.Th(component.SpanText("Name")),
-								nodx.Th(component.SpanText("Bucket name")),
-								nodx.Th(component.SpanText("Endpoint")),
-								nodx.Th(component.SpanText("Region")),
-								nodx.Th(component.SpanText("Access key")),
-								nodx.Th(component.SpanText("Secret key")),
-								nodx.Th(component.SpanText("Created at")),
+								nodx.Th(component.SpanText(t("Name"))),
+								nodx.Th(component.SpanText(t("Bucket name"))),
+								nodx.Th(component.SpanText(t("Endpoint"))),
+								nodx.Th(component.SpanText(t("Region"))),
+								nodx.Th(component.SpanText(t("Access key"))),
+								nodx.Th(component.SpanText(t("Secret key"))),
+								nodx.Th(component.SpanText(t("Created at"))),
 							),
 						),
 						nodx.Tbody(
@@ -66,7 +74,7 @@ func indexPage(reqCtx reqctx.Ctx) nodx.Node {
 	}
 
 	return layout.Dashboard(reqCtx, layout.DashboardParams{
-		Title: "S3 Destinations",
+		Title: t("S3 Destinations"),
 		Body:  content,
 	})
 }

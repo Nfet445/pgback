@@ -3,6 +3,7 @@ package executions
 import (
 	"net/http"
 
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/echoutil"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/util/strutil"
@@ -37,8 +38,10 @@ func (h *handlers) indexPageHandler(c echo.Context) error {
 }
 
 func indexPage(reqCtx reqctx.Ctx, queryData execsQueryData) nodx.Node {
+	t := func(key string) string { if val, ok := i18n.Translations[reqCtx.Language][key]; ok { return val }; return key }
+
 	content := []nodx.Node{
-		component.H1Text("Executions"),
+		component.H1Text(t("Executions")),
 		component.CardBox(component.CardBoxParams{
 			Class: "mt-4",
 			Children: []nodx.Node{
@@ -49,14 +52,14 @@ func indexPage(reqCtx reqctx.Ctx, queryData execsQueryData) nodx.Node {
 						nodx.Thead(
 							nodx.Tr(
 								nodx.Th(nodx.Class("w-1")),
-								nodx.Th(component.SpanText("Status")),
-								nodx.Th(component.SpanText("Backup")),
-								nodx.Th(component.SpanText("Database")),
-								nodx.Th(component.SpanText("Destination")),
-								nodx.Th(component.SpanText("Started at")),
-								nodx.Th(component.SpanText("Finished at")),
-								nodx.Th(component.SpanText("Duration")),
-								nodx.Th(component.SpanText("File size")),
+								nodx.Th(component.SpanText(t("Status"))),
+								nodx.Th(component.SpanText(t("Backup"))),
+								nodx.Th(component.SpanText(t("Database"))),
+								nodx.Th(component.SpanText(t("Destination"))),
+								nodx.Th(component.SpanText(t("Started at"))),
+								nodx.Th(component.SpanText(t("Finished at"))),
+								nodx.Th(component.SpanText(t("Duration"))),
+								nodx.Th(component.SpanText(t("File size"))),
 							),
 						),
 						nodx.Tbody(
@@ -83,7 +86,7 @@ func indexPage(reqCtx reqctx.Ctx, queryData execsQueryData) nodx.Node {
 	}
 
 	return layout.Dashboard(reqCtx, layout.DashboardParams{
-		Title: "Executions",
+		Title: t("Executions"),
 		Body:  content,
 	})
 }

@@ -5,12 +5,14 @@ import (
 	"net/http"
 
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/service/databases"
 	"github.com/eduardolat/pgbackweb/internal/util/echoutil"
 	"github.com/eduardolat/pgbackweb/internal/util/paginateutil"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/util/timeutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
 	"github.com/labstack/echo/v4"
@@ -21,6 +23,7 @@ import (
 
 func (h *handlers) listDatabasesHandler(c echo.Context) error {
 	ctx := c.Request().Context()
+	reqCtx := reqctx.GetCtx(c)
 
 	var formData struct {
 		Page int `query:"page" validate:"required,min=1"`
@@ -43,14 +46,17 @@ func (h *handlers) listDatabasesHandler(c echo.Context) error {
 	}
 
 	return echoutil.RenderNodx(
-		c, http.StatusOK, listDatabases(pagination, databases),
+		c, http.StatusOK, listDatabases(reqCtx, pagination, databases),
 	)
 }
 
 func listDatabases(
+	reqCtx reqctx.Ctx,
 	pagination paginateutil.PaginateResponse,
 	databases []dbgen.DatabasesServicePaginateDatabasesRow,
 ) nodx.Node {
+	t := func(key string) string { if val, ok := i18n.Translations[reqCtx.Language][key]; ok { return val }; return key }
+
 	if len(databases) < 1 {
 		return component.EmptyResultsTr(component.EmptyResultsParams{
 			Title:    "No databases found",
@@ -70,16 +76,16 @@ func listDatabases(
 						)),
 						nodx.Target("_blank"),
 						lucide.List(),
-						component.SpanText("Show executions"),
+						component.SpanText(t("Show executions")),
 					),
-					editDatabaseButton(database),
+					editDatabaseButton(reqCtx, database),
 					component.OptionsDropdownButton(
 						htmx.HxPost(pathutil.BuildPath(fmt.Sprintf("/dashboard/databases/%s/test", database.ID))),
 						htmx.HxDisabledELT("this"),
 						lucide.DatabaseZap(),
-						component.SpanText("Test connection"),
+						component.SpanText(t("Test connection")),
 					),
-					deleteDatabaseButton(database.ID),
+					deleteDatabaseButton(reqCtx, database.ID),
 				),
 			)),
 			nodx.Td(
@@ -91,7 +97,7 @@ func listDatabases(
 					component.SpanText(database.Name),
 				),
 			),
-			nodx.Td(component.SpanText("PostgreSQL "+database.PgVersion)),
+			nodx.Td(component.SpanText(t("PostgreSQL")+" "+database.PgVersion)),
 			nodx.Td(
 				nodx.Class("space-x-1"),
 				component.CopyButtonSm(database.DecryptedConnectionString),

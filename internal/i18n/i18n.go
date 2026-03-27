@@ -20,6 +20,8 @@ var translations = map[string]map[string]string{
 	LangRU: ruTranslations,
 }
 
+var Translations = translations
+
 func SetLanguage(ctx context.Context, lang string) context.Context {
 	return context.WithValue(ctx, languageContextKey, lang)
 }

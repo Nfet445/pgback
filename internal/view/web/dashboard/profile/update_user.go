@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
 	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
@@ -45,7 +46,14 @@ func (h *handlers) updateUserHandler(c echo.Context) error {
 	return respondhtmx.ToastSuccess(c, "Profile updated")
 }
 
-func updateUserForm(user dbgen.User) nodx.Node {
+func updateUserForm(reqCtx reqctx.Ctx, user dbgen.User) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	return component.CardBox(component.CardBoxParams{
 		Children: []nodx.Node{
 			nodx.FormEl(
@@ -53,7 +61,7 @@ func updateUserForm(user dbgen.User) nodx.Node {
 				htmx.HxDisabledELT("find button"),
 				nodx.Class("space-y-2"),
 
-				component.H2Text("Update profile"),
+				component.H2Text(t("Update profile")),
 
 				component.InputControl(component.InputControlParams{
 					Name:         "name",
@@ -102,7 +110,7 @@ func updateUserForm(user dbgen.User) nodx.Node {
 					nodx.Button(
 						nodx.Class("btn btn-primary"),
 						nodx.Type("submit"),
-						component.SpanText("Save changes"),
+						component.SpanText(t("Save changes")),
 						lucide.Save(),
 					),
 				),

@@ -3,6 +3,7 @@ package webhooks
 import (
 	"net/http"
 
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/util/echoutil"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
@@ -21,11 +22,18 @@ func (h *handlers) indexPageHandler(c echo.Context) error {
 }
 
 func indexPage(reqCtx reqctx.Ctx) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	content := []nodx.Node{
 		nodx.Div(
 			nodx.Class("flex justify-between items-start"),
-			component.H1Text("Webhooks"),
-			createWebhookButton(),
+			component.H1Text(t("Webhooks")),
+			createWebhookButton(reqCtx),
 		),
 
 		component.CardBox(component.CardBoxParams{
@@ -38,10 +46,10 @@ func indexPage(reqCtx reqctx.Ctx) nodx.Node {
 						nodx.Thead(
 							nodx.Tr(
 								nodx.Th(nodx.Class("w-1")),
-								nodx.Th(component.SpanText("Name")),
-								nodx.Th(component.SpanText("Event type")),
-								nodx.Th(component.SpanText("Targets")),
-								nodx.Th(component.SpanText("Created at")),
+								nodx.Th(component.SpanText(t("Name"))),
+								nodx.Th(component.SpanText(t("Event type"))),
+								nodx.Th(component.SpanText(t("Targets"))),
+								nodx.Th(component.SpanText(t("Created at"))),
 							),
 						),
 						nodx.Tbody(
@@ -56,7 +64,7 @@ func indexPage(reqCtx reqctx.Ctx) nodx.Node {
 	}
 
 	return layout.Dashboard(reqCtx, layout.DashboardParams{
-		Title: "Webhooks",
+		Title: t("Webhooks"),
 		Body:  content,
 	})
 }
