@@ -64,4 +64,6 @@ var enTranslations = map[string]string{
 	"Are you sure you want to delete this database?": "Are you sure you want to delete this database?",
 	"Chart waiting for data": "Chart waiting for data",
 	"Quantity":         "Quantity",
+	"No executions found": "No executions found",
+	"Wait for the first execution to appear here": "Wait for the first execution to appear here",
 }

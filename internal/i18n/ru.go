@@ -165,4 +165,8 @@ var ruTranslations = map[string]string{
 
 	// Timezone
 	"Timezone":        "Часовой пояс",
+
+	// Webhooks
+	"No executions found": "Выполнений не найдено",
+	"Wait for the first execution to appear here": "Подождите, пока появится первое выполнение",
 }

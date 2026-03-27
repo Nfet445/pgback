@@ -74,8 +74,8 @@ func webhookExecutionsList(
 
 	if len(execs) == 0 {
 		return component.EmptyResultsTr(component.EmptyResultsParams{
-			Title:    "No executions found",
-			Subtitle: "Wait for the first execution to appear here",
+			Title:    t("No executions found"),
+			Subtitle: t("Wait for the first execution to appear here"),
 		})
 	}
 
