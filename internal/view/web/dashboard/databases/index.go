@@ -20,13 +20,22 @@ func (h *handlers) indexPageHandler(c echo.Context) error {
 }
 
 func indexPage(reqCtx reqctx.Ctx) nodx.Node {
-	t := func(key string) string { if val, ok := i18n.Translations[reqCtx.Language][key]; ok { return val }; return key }
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
 
 	content := []nodx.Node{
 		nodx.Div(
 			nodx.Class("flex justify-between items-start"),
 			component.H1Text(t("Databases")),
-			createDatabaseButton(reqCtx),
+			nodx.Div(
+				nodx.Class("flex space-x-2"),
+				connectPostgresButton(reqCtx),
+				createDatabaseButton(reqCtx),
+			),
 		),
 		component.CardBox(component.CardBoxParams{
 			Class: "mt-4",
@@ -36,13 +45,13 @@ func indexPage(reqCtx reqctx.Ctx) nodx.Node {
 					nodx.Table(
 						nodx.Class("table text-nowrap"),
 						nodx.Thead(
-						nodx.Tr(
-							nodx.Th(nodx.Class("w-1")),
-							nodx.Th(component.SpanText(t("Name"))),
-							nodx.Th(component.SpanText(t("Version"))),
-							nodx.Th(component.SpanText(t("Connection string"))),
-							nodx.Th(component.SpanText(t("Created at"))),
-						),
+							nodx.Tr(
+								nodx.Th(nodx.Class("w-1")),
+								nodx.Th(component.SpanText(t("Name"))),
+								nodx.Th(component.SpanText(t("Version"))),
+								nodx.Th(component.SpanText(t("Connection string"))),
+								nodx.Th(component.SpanText(t("Created at"))),
+							),
 						),
 						nodx.Tbody(
 							component.SkeletonTr(8),

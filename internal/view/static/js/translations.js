@@ -170,6 +170,8 @@ window.translations = {
     "Connection error": "Conn error",
     "Timeout error": "Timeout",
     "Unknown error": "Unknown",
+    "Connect PostgreSQL": "Connect PostgreSQL",
+    "Connect and import": "Connect and import",
   },
   ru: {
     Summary: "Обзор",
@@ -340,6 +342,8 @@ window.translations = {
     "Connection error": "Ошибка подключения",
     "Timeout error": "Таймаут",
     "Unknown error": "Неизвестная ошибка",
+    "Connect PostgreSQL": "Подключить PostgreSQL",
+    "Connect and import": "Подключить и импортировать",
   },
 };
 

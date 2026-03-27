@@ -23,6 +23,7 @@ func MountRouter(
 	parent.GET("/list", h.listDatabasesHandler)
 	parent.POST("", h.createDatabaseHandler)
 	parent.POST("/test", h.testDatabaseHandler)
+	parent.POST("/connect-postgres", h.connectPostgresHandler)
 	parent.DELETE("/:databaseID", h.deleteDatabaseHandler)
 	parent.POST("/:databaseID/edit", h.editDatabaseHandler)
 	parent.POST("/:databaseID/test", h.testExistingDatabaseHandler)

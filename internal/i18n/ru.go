@@ -56,6 +56,8 @@ var ruTranslations = map[string]string{
 	"Delete destination":    "Удалить хранилище",
 	"Edit destination":      "Редактировать хранилище",
 	"Restore backup":        "Восстановить из бэкапа",
+	"Connect PostgreSQL":    "Подключить PostgreSQL",
+	"Connect and import":    "Подключить и импортировать",
 
 	// Status
 	"Status":    "Статус",

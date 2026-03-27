@@ -105,6 +105,31 @@ func (Client) Test(version PGVersion, connString string) error {
 	return nil
 }
 
+// ListDatabases returns a list of database names from the PostgreSQL server.
+// It excludes template databases (template0, template1) and the postgres system database.
+func (Client) ListDatabases(version PGVersion, connString string) ([]string, error) {
+	query := "SELECT datname FROM pg_database WHERE datistemplate = false AND datname NOT IN ('postgres')"
+	cmd := exec.Command(version.Value.PSQL, connString, "-t", "-c", query)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf(
+			"error running psql listdatabases v%s: %s",
+			version.Value.Version, output,
+		)
+	}
+
+	var databases []string
+	lines := bytes.Split(output, []byte("\n"))
+	for _, line := range lines {
+		name := bytes.TrimSpace(line)
+		if len(name) > 0 {
+			databases = append(databases, string(name))
+		}
+	}
+
+	return databases, nil
+}
+
 // DumpParams contains the parameters for the pg_dump command
 type DumpParams struct {
 	// DataOnly (--data-only): Dump only the data, not the schema (data definitions).
