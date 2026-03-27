@@ -16,6 +16,7 @@ type Ctx struct {
 	IsAuthed      bool
 	SessionID     uuid.UUID
 	User          dbgen.User
+	Language      string
 }
 
 // SetCtx inserts values into the Echo request context.

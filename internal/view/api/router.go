@@ -19,4 +19,6 @@ func MountRouter(
 		servs: servs,
 	}
 	v1.GET("/health", h.healthHandler)
+
+	parent.POST("/language/:lang", h.setLanguageHandler)
 }

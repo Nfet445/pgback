@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/eduardolat/pgbackweb/internal/database/dbgen"
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	"github.com/eduardolat/pgbackweb/internal/logger"
 	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/labstack/echo/v4"
@@ -15,6 +16,15 @@ func (m *Middleware) InjectReqctx(next echo.HandlerFunc) echo.HandlerFunc {
 		reqCtx := reqctx.Ctx{
 			IsHTMXBoosted: htmx.ServerGetIsBoosted(c.Request().Header),
 		}
+
+		// Get language from cookie
+		lang := i18n.DefaultLanguage
+		if cookie, err := c.Cookie("lang"); err == nil && cookie.Value != "" {
+			if cookie.Value == i18n.LangEN || cookie.Value == i18n.LangRU {
+				lang = cookie.Value
+			}
+		}
+		reqCtx.Language = lang
 
 		found, user, err := m.servs.AuthService.GetUserFromSessionCookie(c)
 		if err != nil {
