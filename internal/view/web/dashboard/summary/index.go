@@ -198,12 +198,6 @@ func indexPage(
 			}),
 		),
 
-		indexHowTo(),
-
-		nodx.Div(
-			nodx.Class("mt-6"),
-			component.SupportProjectSponsors(),
-		),
 	}
 
 	return layout.Dashboard(reqCtx, layout.DashboardParams{

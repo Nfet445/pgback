@@ -39,11 +39,6 @@ func indexPage(reqCtx reqctx.Ctx, queryData resQueryData) nodx.Node {
 	content := []nodx.Node{
 		nodx.Div(
 			component.H1Text("Restorations"),
-			nodx.P(
-				nodx.Text("If PG Back Web has helped you restore your database in an emergency, please"),
-				nodx.Text(" consider supporting the project, "),
-				component.SupportProjectAnchor("learn how here."),
-			),
 		),
 		component.CardBox(component.CardBoxParams{
 			Class: "mt-4",

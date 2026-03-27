@@ -80,10 +80,6 @@ func indexPage(reqCtx reqctx.Ctx) nodx.Node {
 			}),
 		),
 
-		nodx.Div(
-			nodx.Class("mt-4"),
-			component.SupportProjectSponsors(),
-		),
 	}
 
 	return layout.Dashboard(reqCtx, layout.DashboardParams{

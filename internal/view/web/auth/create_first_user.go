@@ -8,6 +8,7 @@ import (
 	"github.com/eduardolat/pgbackweb/internal/util/echoutil"
 	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	"github.com/eduardolat/pgbackweb/internal/validate"
+	"github.com/eduardolat/pgbackweb/internal/view/reqctx"
 	"github.com/eduardolat/pgbackweb/internal/view/web/component"
 	"github.com/eduardolat/pgbackweb/internal/view/web/layout"
 	"github.com/eduardolat/pgbackweb/internal/view/web/respondhtmx"
@@ -19,6 +20,7 @@ import (
 
 func (h *handlers) createFirstUserPageHandler(c echo.Context) error {
 	ctx := c.Request().Context()
+	reqCtx := reqctx.GetCtx(c)
 
 	usersQty, err := h.servs.UsersService.GetUsersQty(ctx)
 	if err != nil {
@@ -33,10 +35,10 @@ func (h *handlers) createFirstUserPageHandler(c echo.Context) error {
 		return c.Redirect(http.StatusFound, pathutil.BuildPath("/auth/login"))
 	}
 
-	return echoutil.RenderNodx(c, http.StatusOK, createFirstUserPage())
+	return echoutil.RenderNodx(c, http.StatusOK, createFirstUserPage(reqCtx.Language))
 }
 
-func createFirstUserPage() nodx.Node {
+func createFirstUserPage(lang string) nodx.Node {
 	content := []nodx.Node{
 		component.H1Text("Create first user"),
 
@@ -108,8 +110,9 @@ func createFirstUserPage() nodx.Node {
 	}
 
 	return layout.Auth(layout.AuthParams{
-		Title: "Create first user",
-		Body:  content,
+		Title:    "Create first user",
+		Body:     content,
+		Language: lang,
 	})
 }
 
