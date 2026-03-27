@@ -61,13 +61,7 @@ func healthButton(
 		Size:  component.SizeMd,
 		Title: t("Health status"),
 		Content: []nodx.Node{
-			component.PText(`
-				The health check for both databases and destinations runs automatically
-				every 10 minutes, when PG Back Web starts, and when you click the
-				"Test connection" button on each resource. You can see additional
-				information and error messages by clicking the health check button
-				for each resource.
-			`),
+			component.PText(t("Health check description")),
 			nodx.Table(
 				nodx.Class("table mt-2"),
 				nodx.Thead(

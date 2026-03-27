@@ -62,7 +62,7 @@ func createAndUpdateWebhookForm(
 
 	databaseSelect := component.SelectControl(component.SelectControlParams{
 		Name:     "target_ids",
-		Label:    "Database targets",
+		Label:    t("Database targets"),
 		Required: true,
 		Children: []nodx.Node{
 			alpine.XModel("targetIds"),
@@ -85,7 +85,7 @@ func createAndUpdateWebhookForm(
 
 	destinationSelect := component.SelectControl(component.SelectControlParams{
 		Name:     "target_ids",
-		Label:    "Destination targets",
+		Label:    t("Destination targets"),
 		Required: true,
 		Children: []nodx.Node{
 			alpine.XModel("targetIds"),
@@ -108,7 +108,7 @@ func createAndUpdateWebhookForm(
 
 	backupSelect := component.SelectControl(component.SelectControlParams{
 		Name:     "target_ids",
-		Label:    "Backup targets",
+		Label:    t("Backup targets"),
 		Required: true,
 		Children: []nodx.Node{
 			alpine.XModel("targetIds"),
@@ -198,8 +198,8 @@ func createAndUpdateWebhookForm(
 
 		component.InputControl(component.InputControlParams{
 			Name:        "name",
-			Label:       "Name",
-			Placeholder: "My webhook",
+			Label:       t("Name"),
+			Placeholder: t("My webhook"),
 			Required:    true,
 			Type:        component.InputTypeText,
 			Children: []nodx.Node{
@@ -209,62 +209,43 @@ func createAndUpdateWebhookForm(
 
 		component.SelectControl(component.SelectControlParams{
 			Name:     "event_type",
-			Label:    "Event type",
+			Label:    t("Event type"),
 			Required: true,
 			HelpButtonChildren: []nodx.Node{
 				component.H3Text(t("Event types")),
-				component.PText(`
-					These are the event types that can trigger a webhook.
-				`),
+				component.PText(t("These are the event types that can trigger a webhook.")),
 
 				nodx.Div(
 					nodx.Class("space-y-2"),
 
 					component.CardBoxSimple(
 						component.H4Text(t("Database healthy")),
-						component.PText(`
-							This event will be triggered when a database changes it's
-							health status from unhealthy to healthy.
-						`),
+						component.PText(t("This event is triggered when a database health status changes from unhealthy to healthy.")),
 					),
 
 					component.CardBoxSimple(
 						component.H4Text(t("Database unhealthy")),
-						component.PText(`
-							This event will be triggered when a database changes it's
-							health status from healthy to unhealthy.
-						`),
+						component.PText(t("This event is triggered when a database health status changes from healthy to unhealthy.")),
 					),
 
 					component.CardBoxSimple(
 						component.H4Text(t("Destination healthy")),
-						component.PText(`
-							This event will be triggered when a destination changes it's
-							health status from unhealthy to healthy.
-						`),
+						component.PText(t("This event is triggered when a destination health status changes from unhealthy to healthy.")),
 					),
 
 					component.CardBoxSimple(
 						component.H4Text(t("Destination unhealthy")),
-						component.PText(`
-							This event will be triggered when a destination changes it's
-							health status from healthy to unhealthy.
-						`),
+						component.PText(t("This event is triggered when a destination health status changes from healthy to unhealthy.")),
 					),
 
 					component.CardBoxSimple(
 						component.H4Text(t("Execution success")),
-						component.PText(`
-							This event will be triggered when a backup execution is
-							successful.
-						`),
+						component.PText(t("This event is triggered when a backup execution succeeds.")),
 					),
 
 					component.CardBoxSimple(
 						component.H4Text(t("Execution failed")),
-						component.PText(`
-							This event will be triggered when a backup execution fails.
-						`),
+						component.PText(t("This event is triggered when a backup execution fails.")),
 					),
 				),
 			},
@@ -278,7 +259,7 @@ func createAndUpdateWebhookForm(
 
 		component.SelectControl(component.SelectControlParams{
 			Name:     "is_active",
-			Label:    "Activate webhook",
+			Label:    t("Activate webhook"),
 			Required: true,
 			Children: []nodx.Node{
 				nodx.Option(
@@ -295,7 +276,7 @@ func createAndUpdateWebhookForm(
 
 		component.InputControl(component.InputControlParams{
 			Name:        "url",
-			Label:       "URL",
+			Label:       t("URL"),
 			Placeholder: "https://example.com/webhook",
 			Required:    true,
 			Type:        component.InputTypeUrl,
@@ -306,7 +287,7 @@ func createAndUpdateWebhookForm(
 
 		component.SelectControl(component.SelectControlParams{
 			Name:     "method",
-			Label:    "Method",
+			Label:    t("Method"),
 			Required: true,
 			Children: []nodx.Node{
 				nodx.Option(
@@ -331,9 +312,9 @@ func createAndUpdateWebhookForm(
 
 		component.TextareaControl(component.TextareaControlParams{
 			Name:        "headers",
-			Label:       "Headers",
+			Label:       t("Headers"),
 			Placeholder: `{ "Authorization": "Bearer my-token" }`,
-			HelpText:    `By default it will send a { "Content-Type": "application/json" } header.`,
+			HelpText:    t(`By default it sends a { "Content-Type": "application/json" } header.`),
 			Children: []nodx.Node{
 				alpine.XRef("headersTextarea"),
 				alpine.XOn("click.outside", "formatHeadersTextarea()"),
@@ -346,9 +327,9 @@ func createAndUpdateWebhookForm(
 
 		component.TextareaControl(component.TextareaControlParams{
 			Name:        "body",
-			Label:       "Body",
+			Label:       t("Body"),
 			Placeholder: `{ "key": "value" }`,
-			HelpText:    `By default it will send an empty json object {}.`,
+			HelpText:    t(`By default it sends an empty JSON object {}.`),
 			Children: []nodx.Node{
 				alpine.XRef("bodyTextarea"),
 				alpine.XOn("click.outside", "formatBodyTextarea()"),

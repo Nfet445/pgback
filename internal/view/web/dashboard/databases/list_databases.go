@@ -55,12 +55,17 @@ func listDatabases(
 	pagination paginateutil.PaginateResponse,
 	databases []dbgen.DatabasesServicePaginateDatabasesRow,
 ) nodx.Node {
-	t := func(key string) string { if val, ok := i18n.Translations[reqCtx.Language][key]; ok { return val }; return key }
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
 
 	if len(databases) < 1 {
 		return component.EmptyResultsTr(component.EmptyResultsParams{
-			Title:    "No databases found",
-			Subtitle: "Wait for the first database to appear here",
+			Title:    t("No databases found"),
+			Subtitle: t("Wait for the first database to appear here"),
 		})
 	}
 

@@ -64,8 +64,8 @@ func listDestinations(
 
 	if len(destinations) < 1 {
 		return component.EmptyResultsTr(component.EmptyResultsParams{
-			Title:    "No destinations found",
-			Subtitle: "Wait for the first destination to appear here",
+			Title:    t("No destinations found"),
+			Subtitle: t("Wait for the first destination to appear here"),
 		})
 	}
 

@@ -228,7 +228,7 @@ func createBackupForm(
 			Required:           true,
 			Type:               component.InputTypeNumber,
 			Pattern:            "[0-9]+",
-			HelpButtonChildren: retentionDaysHelp(),
+			HelpButtonChildren: retentionDaysHelp(reqCtx),
 			Children: []nodx.Node{
 				nodx.Min("0"),
 				nodx.Max("36500"),

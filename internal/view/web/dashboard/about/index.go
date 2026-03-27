@@ -35,14 +35,7 @@ func indexPage(reqCtx reqctx.Ctx) nodx.Node {
 
 			component.CardBox(component.CardBoxParams{
 				Children: []nodx.Node{
-					component.PText(`
-						PG Back Web was born in July 2024 out of a need for a simple and
-						user-friendly backup solution for self-hosted PostgreSQL databases.
-						After searching extensively for an easy-to-use backup tool and not
-						finding one, I decided to create my own. Its mission is to provide a
-						straightforward web interface that makes managing PostgreSQL backups
-						effortless and efficient.
-					`),
+					component.PText(t("PG Back Web was born in July 2024 from the need for a simple and user-friendly backup solution for self-hosted PostgreSQL databases. After searching extensively for an easy-to-use backup tool and not finding one, I decided to create my own. Its mission is to provide a straightforward web interface that makes managing PostgreSQL backups effortless and efficient.")),
 				},
 			}),
 
@@ -87,11 +80,10 @@ func indexPage(reqCtx reqctx.Ctx) nodx.Node {
 				},
 			}),
 		),
-
 	}
 
 	return layout.Dashboard(reqCtx, layout.DashboardParams{
-		Title: "About",
+		Title: t("About"),
 		Body:  content,
 	})
 }

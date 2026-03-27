@@ -23,6 +23,13 @@ import (
 
 func (h *handlers) restoreExecutionHandler(c echo.Context) error {
 	ctx := c.Request().Context()
+	reqCtx := reqctx.GetCtx(c)
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
 
 	var formData struct {
 		ExecutionID uuid.UUID `form:"execution_id" validate:"required,uuid"`
@@ -38,13 +45,13 @@ func (h *handlers) restoreExecutionHandler(c echo.Context) error {
 
 	if formData.DatabaseID == uuid.Nil && formData.ConnString == "" {
 		return respondhtmx.ToastError(
-			c, "Database or connection string is required",
+			c, t("Database or connection string is required"),
 		)
 	}
 
 	if formData.DatabaseID != uuid.Nil && formData.ConnString != "" {
 		return respondhtmx.ToastError(
-			c, "Database and connection string cannot be both set",
+			c, t("Database and connection string cannot be both set"),
 		)
 	}
 
@@ -78,7 +85,7 @@ func (h *handlers) restoreExecutionHandler(c echo.Context) error {
 	}()
 
 	return respondhtmx.ToastSuccess(
-		c, "Process started, check the restorations page for more details",
+		c, t("Process started, check the restorations page for more details"),
 	)
 }
 
@@ -111,11 +118,16 @@ func restoreExecutionForm(
 	execution dbgen.ExecutionsServiceGetExecutionRow,
 	databases []dbgen.DatabasesServiceGetAllDatabasesRow,
 ) nodx.Node {
-	t := func(key string) string { if val, ok := i18n.Translations[reqCtx.Language][key]; ok { return val }; return key }
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
 
 	return nodx.FormEl(
 		htmx.HxPost(pathutil.BuildPath(fmt.Sprintf("/dashboard/executions/%s/restore", execution.ID))),
-		htmx.HxConfirm("Are you sure you want to restore this backup?"),
+		htmx.HxConfirm(t("Are you sure you want to restore this backup?")),
 		htmx.HxDisabledELT("find button"),
 
 		alpine.XData(`{ backup_to: "database" }`),
@@ -133,7 +145,7 @@ func restoreExecutionForm(
 				Name:     "backup_to",
 				Label:    t("Backup"),
 				Required: true,
-				HelpText: "You can restore the backup to an existing database or any other database using a connection string",
+				HelpText: t("You can restore the backup to an existing database or another database using a connection string."),
 				Children: []nodx.Node{
 					alpine.XModel("backup_to"),
 					nodx.Option(
@@ -153,7 +165,7 @@ func restoreExecutionForm(
 				component.SelectControl(component.SelectControlParams{
 					Name:        "database_id",
 					Label:       t("Database"),
-					Placeholder: "Select a database",
+					Placeholder: t("Select a database"),
 					Required:    true,
 					Children: []nodx.Node{
 						nodx.Map(
@@ -175,12 +187,12 @@ func restoreExecutionForm(
 
 			alpine.Template(
 				alpine.XIf("backup_to === 'conn_string'"),
-					component.InputControl(component.InputControlParams{
-						Name:        "conn_string",
-						Label:       t("Connection string"),
-						Placeholder: "postgresql://user:password@localhost:5432/mydb",
-						Type:        component.InputTypeText,
-						Required:    true,
+				component.InputControl(component.InputControlParams{
+					Name:        "conn_string",
+					Label:       t("Connection string"),
+					Placeholder: t("postgresql://user:password@localhost:5432/mydb"),
+					Type:        component.InputTypeText,
+					Required:    true,
 				}),
 			),
 
@@ -193,14 +205,10 @@ func restoreExecutionForm(
 					nodx.Div(
 						nodx.P(
 							component.BText(fmt.Sprintf(
-								"This restoration uses psql v%s", execution.DatabasePgVersion,
+								t("This restoration uses psql v%s"), execution.DatabasePgVersion,
 							)),
 						),
-						component.PText(`
-							Please make sure the database you are restoring to is compatible
-							with this version of psql and double-check that the picked
-							database is the one you want to restore to.
-						`),
+						component.PText(t("Please make sure the target database is compatible with this psql version and double-check that you selected the correct database to restore to.")),
 					),
 				),
 			),
@@ -224,7 +232,12 @@ func restoreExecutionButton(reqCtx reqctx.Ctx, execution dbgen.ExecutionsService
 		return nil
 	}
 
-	t := func(key string) string { if val, ok := i18n.Translations[reqCtx.Language][key]; ok { return val }; return key }
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
 
 	mo := component.Modal(component.ModalParams{
 		Size:  component.SizeMd,

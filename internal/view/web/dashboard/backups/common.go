@@ -1,6 +1,7 @@
 package backups
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/eduardolat/pgbackweb/internal/i18n"
@@ -20,20 +21,12 @@ func localBackupsHelp(reqCtx reqctx.Ctx) []nodx.Node {
 
 	return []nodx.Node{
 		component.H3Text(t("Local backups")),
-		component.PText(`
-			Local backups are stored in the server where PG Back Web is running.
-			They are stored under /backups directory so you can mount a docker
-			volume to this directory to persist the backups in any way you want.
-		`),
+		component.PText(t("Local backups are stored on the server where PG Back Web is running. They are stored under the /backups directory, so you can mount a Docker volume to this directory to persist backups in any way you want.")),
 
 		nodx.Div(
 			nodx.Class("mt-2"),
 			component.H3Text(t("Remote backups")),
-			component.PText(`
-				Remote backups are stored in a destination. A destination is a remote
-				S3 compatible storage. With this option you don't need to worry about
-				creating and managing docker volumes.
-			`),
+			component.PText(t("Remote backups are stored in a destination. A destination is an S3-compatible remote storage. With this option, you do not need to worry about creating and managing Docker volumes.")),
 		),
 	}
 }
@@ -47,12 +40,7 @@ func cronExpressionHelp(reqCtx reqctx.Ctx) []nodx.Node {
 	}
 
 	return []nodx.Node{
-		component.PText(`
-			A cron expression is a string used to define a schedule for running tasks
-			in Unix-like operating systems. It consists of five fields representing
-			the minute, hour, day of the month, month, and day of the week.
-			Cron expressions enable precise scheduling of periodic tasks.
-		`),
+		component.PText(t("A cron expression is a string used to define a schedule for running tasks in Unix-like operating systems. It consists of five fields representing minute, hour, day of month, month, and day of week. Cron expressions enable precise scheduling of periodic tasks.")),
 
 		nodx.Div(
 			nodx.Class("mt-4 flex justify-end items-center space-x-1"),
@@ -85,15 +73,12 @@ func timezoneFilenamesHelp(reqCtx reqctx.Ctx) []nodx.Node {
 	serverTimezone := time.Now().Location().String()
 
 	return []nodx.Node{
-		component.PText(`
-			This is the time zone in which the cron expression will be evaluated.
-		`),
+		component.PText(t("This is the time zone in which the cron expression will be evaluated.")),
 		nodx.P(
-			component.SpanText(`
-				Backup filenames will always use the server timezone (currently 
-			`),
-			component.BText(serverTimezone),
-			component.SpanText(")."),
+			component.SpanText(fmt.Sprintf(
+				t("Backup filenames will always use the server timezone (currently %s)."),
+				serverTimezone,
+			)),
 		),
 
 		nodx.Div(
@@ -118,20 +103,12 @@ func destinationDirectoryHelp(reqCtx reqctx.Ctx) []nodx.Node {
 	}
 
 	return []nodx.Node{
-		component.PText(`
-			The destination directory is the directory where the backups will be
-			stored. This directory is relative to the base directory of the
-			destination. It should start with a slash, should not contain any
-			spaces, and should not end with a slash.
-		`),
+		component.PText(t("The destination directory is where backups will be stored. This directory is relative to the destination base directory. It should start with a slash, contain no spaces, and should not end with a slash.")),
 
 		nodx.Div(
 			nodx.Class("mt-2"),
 			component.H3Text(t("Local backups")),
-			component.PText(`
-				For local backups, the base directory is /backups. So, the backup files
-				will be stored in:
-			`),
+			component.PText(t("For local backups, the base directory is /backups. So backup files will be stored in:")),
 			nodx.Div(
 				nodx.ClassMap{
 					"whitespace-nowrap p-1": true,
@@ -147,10 +124,7 @@ func destinationDirectoryHelp(reqCtx reqctx.Ctx) []nodx.Node {
 		nodx.Div(
 			nodx.Class("mt-2"),
 			component.H3Text(t("Remote backups")),
-			component.PText(`
-				For remote backups, the base directory is the root of the bucket. So,
-				the backup files will be stored in:
-			`),
+			component.PText(t("For remote backups, the base directory is the bucket root. So backup files will be stored in:")),
 			nodx.Div(
 				nodx.ClassMap{
 					"whitespace-nowrap p-1": true,
@@ -165,20 +139,21 @@ func destinationDirectoryHelp(reqCtx reqctx.Ctx) []nodx.Node {
 	}
 }
 
-func retentionDaysHelp() []nodx.Node {
+func retentionDaysHelp(reqCtx reqctx.Ctx) []nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[reqCtx.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	return []nodx.Node{
 		nodx.Div(
 			nodx.Class("space-y-2"),
 
-			component.PText(`
-				Retention days specifies the number of days to keep backup files before
-				they are automatically deleted. This ensures that old backups are removed
-				to save storage space. The retention period is evaluated by execution.
-			`),
+			component.PText(t("Retention days specifies how many days backup files are kept before automatic deletion. This ensures old backups are removed to save storage space. The retention period is evaluated at execution time.")),
 
-			component.PText(`
-				If you set the retention days to 0, the backups will never be deleted.
-			`),
+			component.PText(t("If you set retention days to 0, backups will never be deleted.")),
 		),
 	}
 }
@@ -195,15 +170,9 @@ func pgDumpOptionsHelp(reqCtx reqctx.Ctx) []nodx.Node {
 		nodx.Div(
 			nodx.Class("space-y-2"),
 
-			component.PText(`
-				This software uses the battle tested pg_dump utility to create backups. It
-				makes consistent backups even if the database is being used concurrently.
-			`),
+			component.PText(t("This software uses the battle-tested pg_dump utility to create backups. It creates consistent backups even if the database is being used concurrently.")),
 
-			component.PText(`
-				These are options that will be passed to the pg_dump utility. By default,
-				PG Back Web does not pass any options so the backups are full backups.
-			`),
+			component.PText(t("These options are passed to pg_dump. By default, PG Back Web does not pass any options, so backups are full backups.")),
 
 			nodx.Div(
 				nodx.Class("flex justify-end"),

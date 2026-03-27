@@ -32,10 +32,7 @@ func indexPage(reqCtx reqctx.Ctx) nodx.Node {
 			nodx.Class("flex justify-between items-start space-x-2"),
 			nodx.Div(
 				component.H1Text(t("S3 Destinations")),
-				component.PText(`
-					Here you can manage your S3 destinations. You can skip creating a S3
-					destination if you want to use the local storage for your backups.
-				`),
+				component.PText(t("Destinations description")),
 			),
 			nodx.Div(
 				nodx.Class("flex-none"),
