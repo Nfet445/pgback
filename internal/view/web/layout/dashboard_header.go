@@ -29,6 +29,7 @@ func dashboardHeader(lang string) nodx.Node {
 			component.ChangeThemeButton(component.ChangeThemeButtonParams{
 				Position: component.DropdownPositionBottom,
 				Size:     component.SizeSm,
+				Language: lang,
 			}),
 			component.ChangeLanguageButton(component.ChangeLanguageButtonParams{
 				Position: component.DropdownPositionBottom,
@@ -39,7 +40,7 @@ func dashboardHeader(lang string) nodx.Node {
 		nodx.Div(
 			nodx.Class("flex justify-end items-center space-x-2"),
 			nodx.Div(
-				htmx.HxGet(pathutil.BuildPath("/dashboard/health-button")),
+				htmx.HxGet(pathutil.BuildPath("/dashboard/health-button?lang="+lang)),
 				htmx.HxSwap("outerHTML"),
 				htmx.HxTrigger("load once"),
 			),

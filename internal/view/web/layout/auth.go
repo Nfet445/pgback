@@ -35,6 +35,7 @@ func Auth(params AuthParams) nodx.Node {
 					Position:    component.DropdownPositionTop,
 					AlignsToEnd: false,
 					Size:        component.SizeMd,
+					Language:    params.Language,
 				}),
 				component.ChangeLanguageButton(component.ChangeLanguageButtonParams{
 					Position:    component.DropdownPositionTop,

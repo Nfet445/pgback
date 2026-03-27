@@ -2,10 +2,8 @@ package component
 
 import (
 	"github.com/eduardolat/pgbackweb/internal/i18n"
-	"github.com/eduardolat/pgbackweb/internal/util/pathutil"
 	nodx "github.com/nodxdev/nodxgo"
 	alpine "github.com/nodxdev/nodxgo-alpine"
-	htmx "github.com/nodxdev/nodxgo-htmx"
 	lucide "github.com/nodxdev/nodxgo-lucide"
 )
 
@@ -17,6 +15,13 @@ type ChangeLanguageButtonParams struct {
 }
 
 func ChangeLanguageButton(params ChangeLanguageButtonParams) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[params.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	isEN := params.Language == i18n.LangEN || params.Language == ""
 	isRU := params.Language == i18n.LangRU
 
@@ -44,7 +49,7 @@ func ChangeLanguageButton(params ChangeLanguageButtonParams) nodx.Node {
 			nodx.Div(
 				nodx.Class("flex space-x-1"),
 				lucide.Globe(nodx.Class("size-4")),
-				SpanText("Language"),
+				SpanText(t("Language")),
 				lucide.ChevronDown(),
 			),
 		),
@@ -58,9 +63,7 @@ func ChangeLanguageButton(params ChangeLanguageButtonParams) nodx.Node {
 			},
 			nodx.Li(
 				nodx.Button(
-					htmx.HxPost(pathutil.BuildPath("/api/language/en")),
-					htmx.HxSwap("none"),
-					htmx.HxOn("after-request", "window.location.reload()"),
+					alpine.XOn("click", "setLanguage('en')"),
 					nodx.ClassMap{
 						"btn btn-block": true,
 						"btn-primary":   isEN,
@@ -69,14 +72,12 @@ func ChangeLanguageButton(params ChangeLanguageButtonParams) nodx.Node {
 						"btn-lg":        params.Size == SizeLg,
 					},
 					nodx.Type("button"),
-					SpanText("English"),
+					SpanText(t("English")),
 				),
 			),
 			nodx.Li(
 				nodx.Button(
-					htmx.HxPost(pathutil.BuildPath("/api/language/ru")),
-					htmx.HxSwap("none"),
-					htmx.HxOn("after-request", "window.location.reload()"),
+					alpine.XOn("click", "setLanguage('ru')"),
 					nodx.ClassMap{
 						"btn btn-block": true,
 						"btn-primary":   isRU,
@@ -85,7 +86,7 @@ func ChangeLanguageButton(params ChangeLanguageButtonParams) nodx.Node {
 						"btn-lg":        params.Size == SizeLg,
 					},
 					nodx.Type("button"),
-					SpanText("Russian"),
+					SpanText(t("Russian")),
 				),
 			),
 		),

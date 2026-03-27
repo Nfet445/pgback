@@ -1,3 +1,4 @@
+import "./translations.js";
 import { initThemeHelper } from "./init-theme-helper.js";
 import { initDialogs } from "./init-dialogs.js";
 import { initNotyf } from "./init-notyf.js";

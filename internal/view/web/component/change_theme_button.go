@@ -1,6 +1,7 @@
 package component
 
 import (
+	"github.com/eduardolat/pgbackweb/internal/i18n"
 	nodx "github.com/nodxdev/nodxgo"
 	alpine "github.com/nodxdev/nodxgo-alpine"
 	lucide "github.com/nodxdev/nodxgo-lucide"
@@ -10,9 +11,17 @@ type ChangeThemeButtonParams struct {
 	Position    dropdownPosition
 	AlignsToEnd bool
 	Size        size
+	Language    string
 }
 
 func ChangeThemeButton(params ChangeThemeButtonParams) nodx.Node {
+	t := func(key string) string {
+		if val, ok := i18n.Translations[params.Language][key]; ok {
+			return val
+		}
+		return key
+	}
+
 	return nodx.Div(
 		alpine.XData("alpineChangeThemeButton()"),
 		alpine.XCloak(),
@@ -42,7 +51,7 @@ func ChangeThemeButton(params ChangeThemeButtonParams) nodx.Node {
 					lucide.Sun(alpine.XShow(`theme === "light"`)),
 					lucide.Moon(alpine.XShow(`theme === "dark"`)),
 				),
-				SpanText("Theme"),
+				SpanText(t("Theme")),
 				lucide.ChevronDown(),
 			),
 		),
@@ -64,7 +73,7 @@ func ChangeThemeButton(params ChangeThemeButtonParams) nodx.Node {
 					},
 					nodx.Type("button"),
 					lucide.Laptop(nodx.Class("mr-1")),
-					SpanText("System"),
+					SpanText(t("System")),
 				),
 			),
 			nodx.Li(
@@ -77,7 +86,7 @@ func ChangeThemeButton(params ChangeThemeButtonParams) nodx.Node {
 					},
 					nodx.Type("button"),
 					lucide.Sun(nodx.Class("mr-1")),
-					SpanText("Light"),
+					SpanText(t("Light")),
 				),
 			),
 			nodx.Li(
@@ -90,7 +99,7 @@ func ChangeThemeButton(params ChangeThemeButtonParams) nodx.Node {
 					},
 					nodx.Type("button"),
 					lucide.Moon(nodx.Class("mr-1")),
-					SpanText("Dark"),
+					SpanText(t("Dark")),
 				),
 			),
 		),
