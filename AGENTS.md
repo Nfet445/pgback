@@ -1,5 +1,12 @@
 # PG Back Web - AI Coding Agent Instructions
 
+## Critical Rules
+
+CRITICAL: Always respond in Russian.
+CRITICAL: Limit all AI responses to a maximum of 200 tokens.
+CRITICAL: Use Context7 automatically for library/API docs, setup, and configuration steps.
+CRITICAL: If you are unsure how to do something, use `gh_grep` to search code examples from GitHub.
+
 ## Architecture Overview
 
 PG Back Web is a Go-based PostgreSQL backup management web application with these core layers:
@@ -9,7 +16,7 @@ PG Back Web is a Go-based PostgreSQL backup management web application with thes
 - **Service aggregation**: `internal/service/service.go` creates a single `Service` struct containing all domain services
 - **Domain services**: Each service in `internal/service/{domain}/` follows the pattern:
   - `{domain}.go` - service struct and constructor
-  - SQL files - queries are embedded alongside Go methods, every Go file that uses SQL has it's own SQL file with the same name.
+  - SQL files - queries are embedded alongside Go methods, every Go file that uses SQL has its own SQL file with the same name
   - One Go file per major operation (create, update, delete, etc.)
 
 ### Database & Code Generation
@@ -28,28 +35,120 @@ PG Back Web is a Go-based PostgreSQL backup management web application with thes
 - **Cron scheduling**: `internal/cron/` wraps gocron for backup scheduling
 - **Configuration**: Environment-based config in `internal/config/env.go` with validation
 
-## Development Workflows
+## Build, Test & Development Commands
 
 ### Core Commands (via Taskfile)
 
-Read the `Taskfile.yml` file, but here is a summary of key commands:
-
 ```bash
-task build        # Build Go binary and frontend assets
-task gen:db       # Regenerate SQLC code after SQL changes
-task goose -- up  # Run database migrations
-task test         # Run all tests
-task lint         # Run linters
+# Building
+task build          # Build Go binary and frontend assets
+task build:static   # Build CSS and JS (TailwindCSS + esbuild)
+task dev            # Build and serve with hot reloading
+task serve          # Serve the built binary
+task run            # Build and serve
+
+# Testing
+task test           # Run all tests (auto-runs gen:db first)
+go test -run TestFunctionName ./...     # Run a single test by name pattern
+go test -v ./internal/util/strutil/...  # Run tests in a specific package with verbose output
+
+# Linting & Formatting
+task lint           # Run golangci-lint + prettier check
+task fmt            # Format Go files (gofmt) + Prettier (JS/CSS)
+
+# Database
+task gen:db         # Regenerate SQLC code after SQL changes
+task goose -- up    # Run database migrations
+task reset:db       # Reset the database
+
+# Development
+task deps           # Install Go + npm dependencies
+task tidy           # Tidy go.mod
+task ci             # Full CI pipeline (deps → checkdeps → lint → test → build)
 ```
 
-### Frontend Build Process
+## Code Style Guidelines
 
-- **Two-stage build**: TypeScript build script combines app.js + \*.inc.js files
+### Go Version & Linter
+
+- **Go version**: 1.23.5
+- **Linter**: golangci-lint v2
+- **Enabled linters**: errcheck, govet, ineffassign, staticcheck, unused
+- **Configuration**: `.golangci.yaml`
+
+### Import Ordering
+
+Group imports in this order (separated by blank lines):
+
+1. Standard library packages
+2. External/third-party packages
+3. Internal project packages (`github.com/eduardolat/pgbackweb/internal/...`)
+
+Example:
+
+```go
+import (
+ "time"
+
+ "github.com/eduardolat/pgbackweb/internal/config"
+ "github.com/eduardolat/pgbackweb/internal/database/dbgen"
+)
+```
+
+### Naming Conventions
+
+| Element                     | Convention              | Example                             |
+| --------------------------- | ----------------------- | ----------------------------------- |
+| Types (structs, interfaces) | PascalCase              | `Service`, `Backup`, `Execution`    |
+| Functions                   | PascalCase for exported | `CreateBackup`, `RunExecution`      |
+| Variables                   | mixedCase               | `dbgen`, `env`, `isAuthed`          |
+| Constants                   | PascalCase with prefix  | `maxSessionAge`, `ctxKey`           |
+| Packages                    | Single lowercase word   | `auth`, `backups`, `executions`     |
+| Files                       | snake_case              | `create_backup.go`, `get_backup.go` |
+
+### Service Struct Pattern
+
+Each domain service follows this pattern:
+
+```go
+type Service struct {
+    env   config.Env
+    dbgen *dbgen.Queries
+}
+
+func New(env config.Env, dbgen *dbgen.Queries) *Service {
+    return &Service{
+        env:   env,
+        dbgen: dbgen,
+    }
+}
+```
+
+### Error Handling & Logging
+
+- **Return errors directly** from dbgen calls without wrapping
+- Use `fmt.Errorf()` for custom validation errors with context
+- **Structured logging** via `internal/logger`:
+  - `logger.Error("message", logger.KV{"key": value})` - for errors
+  - `logger.FatalError("message", logger.KV{...})` - for startup failures (calls os.Exit(1))
+  - `logger.Info("message", logger.KV{...})` - for informational logging
+- Always include relevant context in KV pairs (error, id, etc.)
+
+### Database Queries
+
+- Write SQL queries in `.sql` files alongside Go code
+- Prefix query names with service name: `AuthServiceCreateUser`, `BackupsServiceGetByID`
+- Never edit files in `internal/database/dbgen/` directly
+- Run `task gen:db` after modifying any `.sql` files
+
+## Frontend Build Process
+
+- **Two-stage build**: TypeScript build script combines app.js + `*.inc.js` files
 - **Alpine.js integration**: Page-specific JavaScript in `*.inc.js` files within web views
 - **TailwindCSS + DaisyUI**: Styling framework with build integration
 - **Static embedding**: Frontend assets embedded in Go binary via `embed`
 
-### Database Development
+## Database Development
 
 1. Create migration: Add SQL file to `internal/database/migrations/`
 2. Write queries: Add `.sql` files to service directories
@@ -66,16 +165,10 @@ Services follow dependency injection with specific patterns:
 - **ExecutionsService**: Central for backup/restore operations
 - **Integration layer**: Shared by services needing PostgreSQL/storage operations
 
-### Error Handling & Logging
-
-- **Structured logging**: Use `logger.KV{"key": value}` for context
-- **Fatal errors**: Use `logger.FatalError()` for startup failures
-- **Request context**: Available via `internal/view/reqctx` for web handlers
-
 ### Configuration
 
 - **Required env vars**: `PBW_ENCRYPTION_KEY`, `PBW_POSTGRES_CONN_STRING`
-- **Optional env vars**: `PBW_LISTEN_HOST`, `PBW_LISTEN_PORT`, `TZ`
+- **Optional env vars**: `PBW_LISTEN_HOST`, `PBW_LISTEN_PORT`, `PBW_PATH_PREFIX`, `TZ`
 - **Validation**: Environment validation happens in `config/env_validate.go`
 
 ### Testing Conventions
@@ -83,6 +176,7 @@ Services follow dependency injection with specific patterns:
 - **Table-driven tests**: Use struct slices with `t.Run()` for test cases
 - **Helper functions**: Mark test helpers with `t.Helper()`
 - **Utility tests**: Focus on `internal/util/` packages with comprehensive coverage
+- Test files: `*_test.go` in same package as code being tested
 
 ## Critical Integration Points
 
