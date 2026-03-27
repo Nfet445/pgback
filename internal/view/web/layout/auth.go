@@ -6,8 +6,9 @@ import (
 )
 
 type AuthParams struct {
-	Title string
-	Body  []nodx.Node
+	Title    string
+	Body     []nodx.Node
+	Language string
 }
 
 func Auth(params AuthParams) nodx.Node {
@@ -24,10 +25,6 @@ func Auth(params AuthParams) nodx.Node {
 		},
 		nodx.Div(
 			nodx.Class("w-full max-w-[600px] space-y-4"),
-			nodx.Div(
-				nodx.Class("flex justify-center"),
-				component.Logotype(),
-			),
 			nodx.Main(
 				nodx.Class("rounded-box shadow-md bg-base-100 p-4"),
 				nodx.Group(params.Body...),
@@ -39,7 +36,12 @@ func Auth(params AuthParams) nodx.Node {
 					AlignsToEnd: false,
 					Size:        component.SizeMd,
 				}),
-				component.StarOnGithub(component.SizeMd),
+				component.ChangeLanguageButton(component.ChangeLanguageButtonParams{
+					Position:    component.DropdownPositionTop,
+					AlignsToEnd: false,
+					Size:        component.SizeMd,
+					Language:    params.Language,
+				}),
 			),
 		),
 	)

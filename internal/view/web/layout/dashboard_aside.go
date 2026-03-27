@@ -18,30 +18,8 @@ func dashboardAside() nodx.Node {
 			"overflow-y-auto overflow-x-hidden":              true,
 		},
 
-		nodx.A(
-			nodx.Class("block flex flex-col justify-center items-center"),
-			nodx.Href("https://github.com/eduardolat/pgbackweb"),
-			nodx.Target("_blank"),
-			nodx.Img(
-				nodx.Src(pathutil.BuildPath("/images/logo.png")),
-				nodx.Alt("PG Back Web"),
-				nodx.Class("w-[50px] h-auto"),
-			),
-			nodx.SpanEl(
-				nodx.Class("text-xs text-nowrap text-center font-bold mt-1"),
-				nodx.SpanEl(
-					nodx.Class("block"),
-					nodx.Text("PG Back"),
-				),
-				nodx.SpanEl(
-					nodx.Class("block"),
-					nodx.Text("Web"),
-				),
-			),
-		),
-
 		nodx.Div(
-			nodx.Class("mt-6 space-y-4"),
+			nodx.Class("space-y-4"),
 
 			dashboardAsideItem(
 				lucide.LayoutDashboard,

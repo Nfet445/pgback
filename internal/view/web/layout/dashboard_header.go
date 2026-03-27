@@ -8,7 +8,7 @@ import (
 	lucide "github.com/nodxdev/nodxgo-lucide"
 )
 
-func dashboardHeader() nodx.Node {
+func dashboardHeader(lang string) nodx.Node {
 	return nodx.Header(
 		nodx.ClassMap{
 			"sticky top-0 z-50":                 true,
@@ -18,13 +18,15 @@ func dashboardHeader() nodx.Node {
 		},
 		nodx.Div(
 			nodx.Class("flex justify-start items-center space-x-2"),
-			component.SupportProjectButton(component.SizeSm),
 			component.ChangeThemeButton(component.ChangeThemeButtonParams{
 				Position: component.DropdownPositionBottom,
 				Size:     component.SizeSm,
 			}),
-			component.StarOnGithub(component.SizeSm),
-			dashboardHeaderUpdates(),
+			component.ChangeLanguageButton(component.ChangeLanguageButtonParams{
+				Position: component.DropdownPositionBottom,
+				Size:     component.SizeSm,
+				Language: lang,
+			}),
 		),
 		nodx.Div(
 			nodx.Class("flex justify-end items-center space-x-2"),
@@ -32,13 +34,6 @@ func dashboardHeader() nodx.Node {
 				htmx.HxGet(pathutil.BuildPath("/dashboard/health-button")),
 				htmx.HxSwap("outerHTML"),
 				htmx.HxTrigger("load once"),
-			),
-			nodx.A(
-				nodx.Href("https://ufobackup.uforg.dev/r/community"),
-				nodx.Target("_blank"),
-				nodx.Class("btn btn-ghost btn-neutral"),
-				component.SpanText("Join the community"),
-				lucide.ExternalLink(),
 			),
 			nodx.Button(
 				htmx.HxPost(pathutil.BuildPath("/auth/logout")),

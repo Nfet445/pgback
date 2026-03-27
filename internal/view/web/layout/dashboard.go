@@ -30,7 +30,7 @@ func Dashboard(reqCtx reqctx.Ctx, params DashboardParams) nodx.Node {
 		dashboardAside(),
 		nodx.Div(
 			nodx.Class("flex-grow overflow-y-auto"),
-			dashboardHeader(),
+			dashboardHeader(reqCtx.Language),
 			nodx.Main(
 				nodx.Id("dashboard-main"),
 				nodx.Class("p-4"),
